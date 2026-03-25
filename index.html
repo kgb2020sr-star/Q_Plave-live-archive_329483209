@@ -1885,7 +1885,12 @@ function renderLive(){
         const sid=`live_${globalIdx}`;
         const extras=savedExtras(sid);
         const vurl=getVideoUrl(sid);
-        const thumb=getThumbUrl(sid);
+        // thumb: 저장값 → URL 자동 추출 순서로 폴백
+        let thumb=getThumbUrl(sid);
+        if(!thumb&&vurl){
+          const _vid=vurl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/))([a-zA-Z0-9_-]{11})/);
+          if(_vid) thumb=`https://i.ytimg.com/vi/${_vid[1]}/mqdefault.jpg`;
+        }
         const badges=[
           b.pre?'<span class="badge badge-predebut">연습생</span>':'',
           b.dbt?'<span class="badge badge-debut">🐣 데뷔</span>':'',
