@@ -1133,10 +1133,11 @@ function savedExtras(id){
    2. 각 시트(라이브/라디오/라쓰고)를 CSV로 게시
    3. 아래 URL에 복사·붙여넣기 (빈 문자열이면 내장 데이터 사용)
 ──────────────────────────────────────────────────────────────── */
+const SHEET_ID = "1oiCW4x77Nt9ELOlhPwPh4PyHxyy7hmhKzhoSYnCKYd8";
 const SHEETS_CONFIG = {
-  live:   "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Jzmh0_xxgBD0fanSnQAKJ649Jeoo96UZxK1E4HAZ31enLl1yPoIN9arhslfbAQ/pub?gid=1363997352&single=true&output=csv",
-  radio:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Jzmh0_xxgBD0fanSnQAKJ649Jeoo96UZxK1E4HAZ31enLl1yPoIN9arhslfbAQ/pub?gid=78885417&single=true&output=csv",
-  lassgo: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Jzmh0_xxgBD0fanSnQAKJ649Jeoo96UZxK1E4HAZ31enLl1yPoIN9arhslfbAQ/pub?gid=829694958&single=true&output=csv",
+  live:   `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=1363997352`,
+  radio:  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=78885417`,
+  lassgo: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=829694958`,
 };
 
 /* CSV 파싱 (따옴표·쉼표 처리) */
@@ -1556,7 +1557,20 @@ const R=[
 /* helpers for built-in URL/thumb */
 function getLiveIdx(sid){const m=sid.match(/^live_(\d+)$/);return m?+m[1]:-1;}
 function getDefaultUrl(sid){const i=getLiveIdx(sid);if(i<0||i>=L.length)return"";return L[i].url||"";}
-function getThumbUrl(sid){const i=getLiveIdx(sid);if(i<0||i>=L.length)return"";return L[i].thumb||"";}
+function getThumbUrl(sid){
+  const i=getLiveIdx(sid);
+  if(i<0||i>=L.length)return"";
+  if(L[i].thumb)return L[i].thumb;
+  // 썸네일 없으면 URL에서 자동 추출
+  const url=L[i].url||"";
+  const vid=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/))([a-zA-Z0-9_-]{11})/);
+  if(vid){
+    const thumb=`https://i.ytimg.com/vi/${vid[1]}/mqdefault.jpg`;
+    L[i].thumb=thumb; // 캐싱
+    return thumb;
+  }
+  return"";
+}
 function getVideoUrl(sid){const d=getData(sid);return d.videoUrl||getDefaultUrl(sid);}
 
 document.getElementById("stat-live").textContent=L.length;
