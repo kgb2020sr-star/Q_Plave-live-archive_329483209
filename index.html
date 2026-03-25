@@ -1869,15 +1869,16 @@ function renderLive(){
       const cardsHtml=mitems.map((b)=>{
         const globalIdx=L.indexOf(b);
         const sid=`live_${globalIdx}`;
+        const extras=savedExtras(sid);
+        const vurl=getVideoUrl(sid);
+        const thumb=getThumbUrl(sid);
         const badges=[
           b.pre?'<span class="badge badge-predebut">연습생</span>':'',
           b.dbt?'<span class="badge badge-debut">🐣 데뷔</span>':'',
           b.b?'<span class="badge badge-bday">🎂 생일</span>':'',
           '<span class="badge badge-type-live">📺</span>',
+          vurl?'<span class="badge" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);">🔗</span>':'',
         ].filter(Boolean).join("");
-        const extras=savedExtras(sid);
-        const vurl=getVideoUrl(sid);
-        const thumb=getThumbUrl(sid);
         const thumbHtml=thumb
           ?`<a class="card-thumb-link" href="${escH(vurl||'#')}" target="_blank" onclick="event.stopPropagation()"><img src="${escH(thumb)}" onerror="window.thumbErr&&window.thumbErr(this)" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></a>`
           :`<div class="card-thumb-empty">📺</div>`;
@@ -1966,7 +1967,7 @@ function renderRadio(){
         return`<div class="card ${cc(r.dj)}" onclick="openEdit('${sid}','${escH(cardTitle)}','${yy}.${r.d}','radio')">
           <div class="card-top">
             <span class="card-date">${yy}.${r.d}</span>
-            <div class="card-badges"><span class="badge badge-type-radio">📻 라디오</span></div>
+            <div class="card-badges"><span class="badge badge-type-radio">📻 라디오</span>${getVideoUrl(sid)?'<span class="badge" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);">🔗</span>':''}</div>
           </div>
           <div class="card-ep">Ep.${ep}</div>
           <div class="card-row"><span class="card-row-label">DJ</span><div class="card-members">${pills(r.dj)}</div></div>
@@ -2070,7 +2071,7 @@ function renderLassgo(){
         return`<div class="card c-all" onclick="openEdit('${sid}','${escH(p.t)}','${p.y}.${p.d}','lassgo')">
           <div class="card-top">
             <span class="card-date">${p.y}.${p.d}</span>
-            <div class="card-badges"><span class="badge badge-type-lassgo">🚀 라쓰고</span></div>
+            <div class="card-badges"><span class="badge badge-type-lassgo">🚀 라쓰고</span>${getVideoUrl(sid)?'<span class="badge" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);">🔗</span>':''}</div>
           </div>
           <div class="card-ep" style="color:rgba(255,183,77,.8);">Ep.${p.ep}</div>
           <div class="card-title">${p.t.replace(/^EP\.\d+\s*\|\s*/,"")}</div>
