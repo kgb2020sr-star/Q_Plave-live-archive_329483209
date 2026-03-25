@@ -33,9 +33,9 @@ body::before{content:'';position:fixed;inset:0;
     radial-gradient(1px 1px at 5% 50%,rgba(255,255,255,.15) 0%,transparent 100%);
   pointer-events:none;z-index:0;}
 
-header{position:relative;z-index:1;text-align:center;padding:52px 20px 32px;border-bottom:1px solid var(--border);}
-.logo-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(28px,6vw,50px);letter-spacing:.12em;
-  background:linear-gradient(135deg,var(--yejun) 0%,var(--noah) 25%,var(--bambi) 50%,var(--eunho) 75%,var(--hamin) 100%);
+header{position:sticky;top:0;z-index:101;background:rgba(6,6,17,.96);backdrop-filter:blur(12px);text-align:center;padding:18px 20px 14px;border-bottom:1px solid var(--border);}
+.logo-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(22px,4.5vw,42px);letter-spacing:.12em;
+  background:linear-gradient(90deg,var(--yejun) 0%,var(--yejun) 12%,var(--noah) 28%,var(--bambi) 50%,var(--eunho) 72%,var(--hamin) 88%,var(--hamin) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .logo-sub{font-size:11px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:5px;}
 .stats-row{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
@@ -61,8 +61,8 @@ header{position:relative;z-index:1;text-align:center;padding:52px 20px 32px;bord
 .controls-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
 .search-row{position:relative;}
 .search-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
-  padding:8px 14px 8px 36px;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
-.search-input:focus{border-color:rgba(168,85,247,.5);}
+  padding:8px 14px 8px 36px;color:rgba(255,255,255,.55);font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:rgba(168,85,247,.5);color:rgba(255,255,255,.75);}
 .search-input::placeholder{color:var(--muted);}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
 .filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
@@ -349,7 +349,10 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
       <button class="tab-btn" onclick="switchTab('radio',this)">📻 라디오</button>
       <button class="tab-btn" onclick="switchTab('lassgo',this)">🚀 라쓰고</button>
     </div>
-    <button class="btn-add-live" onclick="openAddLive()">＋ 새 방송 추가</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="btn-add-live" id="sheets-refresh-btn" onclick="refreshFromSheets()" title="구글 시트에서 최신 데이터 불러오기">↻ 시트 동기화</button>
+      <button class="btn-add-live" onclick="openAddLive()">＋ 새 방송 추가</button>
+    </div>
   </div>
 </div>
 
@@ -528,7 +531,7 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
     <div class="modal-header">
       <div id="m-thumb-wrap" style="flex-shrink:0;display:none;margin-right:14px;">
         <a id="m-thumb-link" href="#" target="_blank" onclick="event.stopPropagation()">
-          <img id="m-thumb-img" src="" onerror="thumbErr(this)"
+          <img id="m-thumb-img" src=""
             style="width:120px;height:68px;object-fit:cover;border-radius:7px;display:block;" alt="">
         </a>
       </div>
@@ -1124,6 +1127,121 @@ function savedExtras(id){
   return html;
 }
 
+/* ── GOOGLE SHEETS 연동 ──────────────────────────────────────────
+   사용법:
+   1. Google Sheets에서 파일 → 공유 → 웹에 게시
+   2. 각 시트(라이브/라디오/라쓰고)를 CSV로 게시
+   3. 아래 URL에 복사·붙여넣기 (빈 문자열이면 내장 데이터 사용)
+──────────────────────────────────────────────────────────────── */
+const SHEETS_CONFIG = {
+  live:   "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Jzmh0_xxgBD0fanSnQAKJ649Jeoo96UZxK1E4HAZ31enLl1yPoIN9arhslfbAQ/pub?gid=1363997352&single=true&output=csv",
+  radio:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Jzmh0_xxgBD0fanSnQAKJ649Jeoo96UZxK1E4HAZ31enLl1yPoIN9arhslfbAQ/pub?gid=78885417&single=true&output=csv",
+  lassgo: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Jzmh0_xxgBD0fanSnQAKJ649Jeoo96UZxK1E4HAZ31enLl1yPoIN9arhslfbAQ/pub?gid=829694958&single=true&output=csv",
+};
+
+/* CSV 파싱 (따옴표·쉼표 처리) */
+function parseCSV(text){
+  const lines = text.trim().split(/\r?\n/);
+  return lines.slice(1).map(line => {
+    const cols = [];
+    let cur = "", inQ = false;
+    for(let i=0;i<line.length;i++){
+      const c=line[i];
+      if(c==='"'){ inQ=!inQ; continue; }
+      if(c===','&&!inQ){ cols.push(cur.trim()); cur=""; continue; }
+      cur+=c;
+    }
+    cols.push(cur.trim());
+    return cols;
+  }).filter(r=>r.length>1&&r[0]);
+}
+
+/* CSV → L[] 형식 변환
+   컬럼: 연도, 날짜(MM.DD), 제목, 멤버, YouTube_URL, 썸네일_URL */
+function csvToLive(rows){
+  return rows.map(r=>{
+    const [y,d,t,m,url,thumb] = r;
+    const members = m ? m.split(/[,，、]/).map(s=>s.trim()).filter(Boolean) : ["전원"];
+    const entry = {y:+y, d, t, m:members, url:url||"", thumb:thumb||""};
+    if(url&&!thumb){
+      const vid = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/))([a-zA-Z0-9_-]{11})/);
+      if(vid) entry.thumb = `https://i.ytimg.com/vi/${vid[1]}/mqdefault.jpg`;
+    }
+    return entry;
+  }).filter(e=>e.y&&e.d&&e.t);
+}
+
+/* CSV → R[] 형식 변환
+   컬럼: 연도, 날짜(MM.DD), DJ, 게스트, YouTube_URL, 썸네일_URL */
+function csvToRadio(rows){
+  return rows.map(r=>{
+    const [y,d,dj,g,url,thumb] = r;
+    const djArr = dj ? dj.split(/[,，、]/).map(s=>s.trim()).filter(Boolean) : [];
+    const gArr  = g  ? g.split(/[,，、]/).map(s=>s.trim()).filter(Boolean) : [];
+    return {y:+y, d, dj:djArr, g:gArr, url:url||"", thumb:thumb||""};
+  }).filter(e=>e.y&&e.d);
+}
+
+/* CSV → P[] 형식 변환
+   컬럼: 연도, 날짜(MM.DD), EP, 제목, YouTube_URL, 썸네일_URL */
+function csvToLassgo(rows){
+  return rows.map(r=>{
+    const [y,d,ep,t,url,thumb] = r;
+    return {y:+y, d, ep:+ep, t, url:url||"", thumb:thumb||""};
+  }).filter(e=>e.y&&e.d&&e.t);
+}
+
+/* Sheets에서 데이터 로드 후 렌더링 */
+async function refreshFromSheets(){
+  const btn=document.getElementById("sheets-refresh-btn");
+  btn.textContent="↻ 로딩 중...";
+  btn.style.opacity=".5";
+  btn.disabled=true;
+  try{
+    await loadFromSheets();
+    btn.textContent="✅ 완료";
+    setTimeout(()=>{btn.textContent="↻ 시트 동기화";btn.style.opacity="";btn.disabled=false;},1500);
+  }catch(e){
+    btn.textContent="❌ 실패";
+    setTimeout(()=>{btn.textContent="↻ 시트 동기화";btn.style.opacity="";btn.disabled=false;},2000);
+  }
+}
+async function loadFromSheets(){
+  const cfg = SHEETS_CONFIG;
+  let loaded = false;
+  try {
+    if(cfg.live){
+      const res = await fetch(cfg.live);
+      if(res.ok){
+        const rows = parseCSV(await res.text());
+        const newL = csvToLive(rows);
+        if(newL.length){
+          L.length=0; newL.forEach(e=>L.push(e));
+          document.getElementById("stat-live").textContent=L.length;
+          loaded=true;
+        }
+      }
+    }
+    if(cfg.radio){
+      const res = await fetch(cfg.radio);
+      if(res.ok){
+        const rows = parseCSV(await res.text());
+        const newR = csvToRadio(rows);
+        if(newR.length){ R.length=0; newR.forEach(e=>R.push(e)); document.getElementById("stat-radio").textContent=R.length; loaded=true; }
+      }
+    }
+    if(cfg.lassgo){
+      const res = await fetch(cfg.lassgo);
+      if(res.ok){
+        const rows = parseCSV(await res.text());
+        const newP = csvToLassgo(rows);
+        if(newP.length){ P.length=0; newP.forEach(e=>P.push(e)); document.getElementById("stat-lassgo").textContent=P.length; loaded=true; }
+      }
+    }
+  } catch(e){ console.warn("Sheets 로드 실패, 내장 데이터 사용:", e); }
+  if(loaded) render();
+}
+
 /* ── DATA ── */
 const L=[
   {y:2022,d:"09.15",t:"플레이브 공식 유죄인간 연습생 예준의 첫 번째 라이브 풀버전💙",m:["예준"],pre:1,url:"https://youtu.be/2l2nip8yy0g",thumb:"https://i.ytimg.com/vi/2l2nip8yy0g/mqdefault.jpg"},
@@ -1563,6 +1681,17 @@ function submitAddLive(){
     if(customs.length) document.getElementById("stat-live").textContent=L.length;
   }catch{}
 })();
+/* ── sticky offset calc ── */
+function updateStickyOffsets(){
+  const headerH=document.querySelector("header").offsetHeight;
+  const tabH=document.querySelector(".tab-bar").offsetHeight;
+  document.querySelector(".tab-bar").style.top=headerH+"px";
+  const ctrl=document.querySelector(".controls");
+  if(ctrl)ctrl.style.top=(headerH+tabH)+"px";
+}
+window.addEventListener("load",updateStickyOffsets);
+window.addEventListener("resize",updateStickyOffsets);
+
 function switchTab(t,btn){
   curTab=t;
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
@@ -1690,11 +1819,19 @@ document.getElementById("search").addEventListener("input",e=>{curQ=e.target.val
 document.getElementById("tag-search").addEventListener("input",e=>{curTagQ=e.target.value.trim();render();});
 
 /* ── render live ── */
-function matchTitle(t){
+function matchTitleOrTags(t, sid){
   if(!curQ)return true;
   const q2=curQ.toLowerCase();
   const tl=t.toLowerCase();
-  return curTagMode==="exact"?tl===q2:tl.includes(q2);
+  if(curTagMode==="exact"){
+    if(tl===q2)return true;
+  } else {
+    if(tl.includes(q2))return true;
+  }
+  // also search tags A/B/C
+  const d=getData(sid);
+  const allTags=[...d.tagsA,...d.tagsB,...d.tagsC];
+  return allTags.some(tag=>tag.toLowerCase().includes(q2));
 }
 function matchYear(y){
   if(curYear==="all")return true;
@@ -1707,7 +1844,7 @@ function renderLive(){
     if(!matchEra(b.y,b.d))return false;
     if(!matchM(b.m))return false;
     if(!matchSpecial(b.d,b.t))return false;
-    if(!matchTitle(b.t))return false;
+    if(!matchTitleOrTags(b.t,`live_${L.indexOf(b)}`))return false;
     if(curTagQ&&!matchTag(`live_${L.indexOf(b)}`))return false;
     return true;
   });
@@ -1742,7 +1879,7 @@ function renderLive(){
         const vurl=getVideoUrl(sid);
         const thumb=getThumbUrl(sid);
         const thumbHtml=thumb
-          ?`<a class="card-thumb-link" href="${escH(vurl||'#')}" target="_blank" onclick="event.stopPropagation()"><img src="${escH(thumb)}" onerror="thumbErr(this)" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></a>`
+          ?`<a class="card-thumb-link" href="${escH(vurl||'#')}" target="_blank" onclick="event.stopPropagation()"><img src="${escH(thumb)}" onerror="window.thumbErr&&window.thumbErr(this)" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></a>`
           :`<div class="card-thumb-empty">📺</div>`;
         const isDebut=SEASON_DATES.has(toNum(b.y,b.d));
         const eraLabel=isDebut?SEASON_LABEL[toNum(b.y,b.d)]:"";
@@ -1786,8 +1923,13 @@ function renderRadio(){
       if(!matchM(r.dj)&&!r.g.some(m=>curMemSet.has(m)))return false;
     }
     if(curQ){
+      const sid=`radio_${R.indexOf(r)}`;
       const s=r.dj.join(" ")+" "+r.g.join(" ")+" "+r.y+"."+r.d;
-      if(curTagMode==="exact"?s.toLowerCase()!==curQ.toLowerCase():!s.toLowerCase().includes(curQ.toLowerCase()))return false;
+      const q2=curQ.toLowerCase();
+      const inTitle=curTagMode==="exact"?s.toLowerCase()===q2:s.toLowerCase().includes(q2);
+      const d=getData(sid);
+      const inTags=[...d.tagsA,...d.tagsB,...d.tagsC].some(tag=>tag.toLowerCase().includes(q2));
+      if(!inTitle&&!inTags)return false;
     }
     if(curTagQ&&!matchTag(`radio_${R.indexOf(r)}`))return false;
     return true;
@@ -1906,7 +2048,7 @@ function renderLassgo(){
   const f=P.filter(p=>{
     if(!matchYear(p.y))return false;
     if(!matchEra(p.y,p.d))return false;
-    if(!matchTitle(p.t))return false;
+    if(!matchTitleOrTags(p.t,`lassgo_${P.indexOf(p)}`))return false;
     if(curTagQ&&!matchTag(`lassgo_${P.indexOf(p)}`))return false;
     return true;
   });
@@ -1940,6 +2082,7 @@ function renderLassgo(){
   }).join("");
 }
 render();
+loadFromSheets();
 </script>
 </body>
 </html>
