@@ -351,6 +351,7 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <button class="btn-add-live" id="sheets-refresh-btn" onclick="refreshFromSheets()" title="구글 시트에서 최신 데이터 불러오기">↻ 시트 동기화</button>
+      <button class="btn-add-live" id="tag-backup-btn" onclick="backupTagsToSheets()" title="태그를 구글 시트에 백업">🏷️ 태그 백업</button>
       <button class="btn-add-live" onclick="openAddLive()">＋ 새 방송 추가</button>
     </div>
   </div>
@@ -1133,6 +1134,58 @@ function savedExtras(id){
    2. 각 시트(라이브/라디오/라쓰고)를 CSV로 게시
    3. 아래 URL에 복사·붙여넣기 (빈 문자열이면 내장 데이터 사용)
 ──────────────────────────────────────────────────────────────── */
+/* ── APPS SCRIPT 웹훅 ──────────────────────────────────────────
+   태그 백업용. Apps Script doPost에 saveTag 핸들러 추가 후 URL 입력
+──────────────────────────────────────────────────────────────── */
+const WEBHOOK_URL = "";  // Apps Script 웹훅 URL 입력
+
+/* localStorage에서 태그 전체 수집 → 웹훅으로 일괄 전송 */
+async function backupTagsToSheets(){
+  const btn=document.getElementById("tag-backup-btn");
+  if(!WEBHOOK_URL){
+    alert("WEBHOOK_URL이 설정되지 않았어요.\nHTML 상단 WEBHOOK_URL에 Apps Script URL을 입력해주세요.");
+    return;
+  }
+  btn.textContent="🏷️ 백업 중...";
+  btn.style.opacity=".5";
+  btn.disabled=true;
+
+  // localStorage에서 태그 데이터 전체 수집
+  const allTags=[];
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(!key||!key.startsWith("plave_v2_"))continue;
+    try{
+      const d=JSON.parse(localStorage.getItem(key)||"{}");
+      const hasData=(d.tagsA&&d.tagsA.length)||(d.tagsB&&d.tagsB.length)||
+                    (d.tagsC&&d.tagsC.length)||(d.links&&d.links.length)||d.videoUrl;
+      if(hasData) allTags.push({sid:key.replace("plave_v2_",""),...d});
+    }catch{}
+  }
+
+  if(!allTags.length){
+    btn.textContent="🏷️ 태그 없음";
+    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;},1500);
+    return;
+  }
+
+  try{
+    const res=await fetch(WEBHOOK_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"saveTags",tags:allTags})
+    });
+    const json=await res.json();
+    if(json.ok){
+      btn.textContent=`✅ ${allTags.length}개 백업 완료`;
+      setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;},2000);
+    } else {throw new Error("서버 오류");}
+  }catch(e){
+    btn.textContent="❌ 실패";
+    console.error("태그 백업 실패:",e);
+    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;},2000);
+  }
+}
 const SHEET_ID = "1oiCW4x77Nt9ELOlhPwPh4PyHxyy7hmhKzhoSYnCKYd8";
 const SHEETS_CONFIG = {
   live:   `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=1363997352`,
