@@ -2036,14 +2036,25 @@ function renderRadio(){
             ).join("")
           :`<span class="guest-none">—</span>`;
         const extras=savedExtras(sid);
+        const vurl=getVideoUrl(sid);
+        let rthumb=getData(sid).thumb||"";
+        if(!rthumb&&vurl){const _v=vurl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/))([a-zA-Z0-9_-]{11})/);if(_v)rthumb=`https://i.ytimg.com/vi/${_v[1]}/mqdefault.jpg`;}
+        const rThumbHtml=rthumb
+          ?`<a class="card-thumb-link" href="${escH(vurl||'#')}" target="_blank" onclick="event.stopPropagation()"><img src="${escH(rthumb)}" onerror="window.thumbErr&&window.thumbErr(this)" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></a>`
+          :`<div class="card-thumb-empty">📻</div>`;
         return`<div class="card ${cc(r.dj)}" onclick="openEdit('${sid}','${escH(cardTitle)}','${yy}.${r.d}','radio')">
-          <div class="card-top">
-            <span class="card-date">${yy}.${r.d}</span>
-            <div class="card-badges"><span class="badge badge-type-radio">📻 라디오</span>${getVideoUrl(sid)?'<span class="badge" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);">🔗</span>':''}</div>
+          <div class="card-with-thumb">
+            ${rThumbHtml}
+            <div class="card-body-wrap">
+              <div class="card-top">
+                <span class="card-date">${yy}.${r.d}</span>
+                <div class="card-badges"><span class="badge badge-type-radio">📻 라디오</span>${vurl?'<span class="badge" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);">🔗</span>':''}</div>
+              </div>
+              <div class="card-ep">Ep.${ep}</div>
+              <div class="card-row"><span class="card-row-label">DJ</span><div class="card-members">${pills(r.dj)}</div></div>
+              <div class="card-row"><span class="card-row-label">게스트</span><div class="card-members">${gHtml}</div></div>
+            </div>
           </div>
-          <div class="card-ep">Ep.${ep}</div>
-          <div class="card-row"><span class="card-row-label">DJ</span><div class="card-members">${pills(r.dj)}</div></div>
-          <div class="card-row"><span class="card-row-label">게스트</span><div class="card-members">${gHtml}</div></div>
           ${extras}
           <span class="card-edit-hint">✏ 편집</span>
         </div>`;
@@ -2140,13 +2151,24 @@ function renderLassgo(){
         const gIdx=P.indexOf(p);
         const sid=`lassgo_${gIdx}`;
         const extras=savedExtras(sid);
+        const pvurl=getVideoUrl(sid);
+        let pthumb=getData(sid).thumb||"";
+        if(!pthumb&&pvurl){const _v=pvurl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/))([a-zA-Z0-9_-]{11})/);if(_v)pthumb=`https://i.ytimg.com/vi/${_v[1]}/mqdefault.jpg`;}
+        const pThumbHtml=pthumb
+          ?`<a class="card-thumb-link" href="${escH(pvurl||'#')}" target="_blank" onclick="event.stopPropagation()"><img src="${escH(pthumb)}" onerror="window.thumbErr&&window.thumbErr(this)" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></a>`
+          :`<div class="card-thumb-empty">🚀</div>`;
         return`<div class="card c-all" onclick="openEdit('${sid}','${escH(p.t)}','${p.y}.${p.d}','lassgo')">
-          <div class="card-top">
-            <span class="card-date">${p.y}.${p.d}</span>
-            <div class="card-badges"><span class="badge badge-type-lassgo">🚀 라쓰고</span>${getVideoUrl(sid)?'<span class="badge" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);">🔗</span>':''}</div>
+          <div class="card-with-thumb">
+            ${pThumbHtml}
+            <div class="card-body-wrap">
+              <div class="card-top">
+                <span class="card-date">${p.y}.${p.d}</span>
+                <div class="card-badges"><span class="badge badge-type-lassgo">🚀 라쓰고</span>${pvurl?'<span class="badge" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);">🔗</span>':''}</div>
+              </div>
+              <div class="card-ep" style="color:rgba(255,183,77,.8);">Ep.${p.ep}</div>
+              <div class="card-title">${p.t.replace(/^EP\.\d+\s*\|\s*/,"")}</div>
+            </div>
           </div>
-          <div class="card-ep" style="color:rgba(255,183,77,.8);">Ep.${p.ep}</div>
-          <div class="card-title">${p.t.replace(/^EP\.\d+\s*\|\s*/,"")}</div>
           ${extras}
           <span class="card-edit-hint">✏ 편집</span>
         </div>`;
