@@ -349,9 +349,22 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
       <button class="tab-btn" onclick="switchTab('radio',this)">📻 라디오</button>
       <button class="tab-btn" onclick="switchTab('lassgo',this)">🚀 라쓰고</button>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <button class="btn-add-live" id="sheets-refresh-btn" onclick="refreshFromSheets()" title="구글 시트에서 최신 데이터 불러오기">↻ 시트 동기화</button>
-      <button class="btn-add-live" id="tag-backup-btn" onclick="backupTagsToSheets()" title="태그를 구글 시트에 백업">🏷️ 태그 백업</button>
+      <!-- 태그 백업 -->
+      <div style="position:relative;display:inline-flex;flex-direction:column;gap:2px;">
+        <button class="btn-add-live" id="tag-backup-btn" onclick="backupTagsToSheets()" title="태그를 구글 시트에 백업">🏷️ 태그 백업</button>
+        <div id="tag-backup-bar" style="display:none;height:3px;border-radius:2px;background:rgba(45,212,191,.2);overflow:hidden;">
+          <div id="tag-backup-fill" style="height:100%;background:#2dd4bf;width:0%;transition:width .3s;"></div>
+        </div>
+      </div>
+      <!-- 수기 추가 백업 -->
+      <div style="position:relative;display:inline-flex;flex-direction:column;gap:2px;">
+        <button class="btn-add-live" id="custom-backup-btn" onclick="backupCustomToSheets()" title="수기 추가 방송을 구글 시트에 백업">📋 수기 백업</button>
+        <div id="custom-backup-bar" style="display:none;height:3px;border-radius:2px;background:rgba(168,85,247,.2);overflow:hidden;">
+          <div id="custom-backup-fill" style="height:100%;background:var(--noah);width:0%;transition:width .3s;"></div>
+        </div>
+      </div>
       <button class="btn-add-live" onclick="openAddLive()">＋ 새 방송 추가</button>
     </div>
   </div>
@@ -1140,17 +1153,18 @@ function savedExtras(id){
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwHfVcFGpGvaiA7Ro-X-AneAXxu2mUw2qJ66ynG_TKVemblPHpHmQnJNJGMXIkmn3U/exec";
 
 /* localStorage에서 태그 전체 수집 → 웹훅으로 일괄 전송 */
+/* ── 진행바 헬퍼 ── */
+function showBar(barId,fillId){document.getElementById(barId).style.display="";setBar(fillId,0);}
+function setBar(fillId,pct){document.getElementById(fillId).style.width=pct+"%";}
+function hideBar(barId){setTimeout(()=>{document.getElementById(barId).style.display="none";},600);}
+
 async function backupTagsToSheets(){
   const btn=document.getElementById("tag-backup-btn");
-  if(!WEBHOOK_URL){
-    alert("WEBHOOK_URL이 설정되지 않았어요.\nHTML 상단 WEBHOOK_URL에 Apps Script URL을 입력해주세요.");
-    return;
-  }
-  btn.textContent="🏷️ 백업 중...";
-  btn.style.opacity=".5";
-  btn.disabled=true;
+  if(!WEBHOOK_URL){alert("WEBHOOK_URL이 설정되지 않았어요.");return;}
+  btn.textContent="🏷️ 수집 중...";btn.style.opacity=".5";btn.disabled=true;
+  showBar("tag-backup-bar","tag-backup-fill");
+  setBar("tag-backup-fill",10);
 
-  // localStorage에서 태그 데이터 전체 수집
   const allTags=[];
   for(let i=0;i<localStorage.length;i++){
     const key=localStorage.key(i);
@@ -1164,25 +1178,60 @@ async function backupTagsToSheets(){
   }
 
   if(!allTags.length){
-    btn.textContent="🏷️ 태그 없음";
-    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;},1500);
+    btn.textContent="🏷️ 태그 없음";setBar("tag-backup-fill",100);
+    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;hideBar("tag-backup-bar");},1500);
     return;
   }
 
   try{
-    const res=await fetch(WEBHOOK_URL,{
-      method:"POST",
-      mode:"no-cors",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({action:"saveTags",tags:allTags})
-    });
-    // no-cors 모드에서는 응답 확인 불가 → 전송 성공으로 간주
-    btn.textContent=`✅ ${allTags.length}개 백업 완료`;
-    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;},2000);
+    const CHUNK=20,total=allTags.length;
+    for(let i=0;i<total;i+=CHUNK){
+      await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"saveTags",tags:allTags.slice(i,i+CHUNK)})});
+      setBar("tag-backup-fill",10+Math.round((Math.min(i+CHUNK,total)/total)*85));
+      if(i+CHUNK<total)await new Promise(r=>setTimeout(r,300));
+    }
+    setBar("tag-backup-fill",100);
+    btn.textContent=`✅ ${total}개 완료`;
+    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;hideBar("tag-backup-bar");},2000);
   }catch(e){
-    btn.textContent="❌ 실패";
-    console.error("태그 백업 실패:",e);
-    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;},2000);
+    document.getElementById("tag-backup-fill").style.background="#ff5252";
+    setBar("tag-backup-fill",100);btn.textContent="❌ 실패";
+    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;hideBar("tag-backup-bar");document.getElementById("tag-backup-fill").style.background="#2dd4bf";},2000);
+  }
+}
+
+async function backupCustomToSheets(){
+  const btn=document.getElementById("custom-backup-btn");
+  if(!WEBHOOK_URL){alert("WEBHOOK_URL이 설정되지 않았어요.");return;}
+  btn.textContent="📋 수집 중...";btn.style.opacity=".5";btn.disabled=true;
+  showBar("custom-backup-bar","custom-backup-fill");
+  setBar("custom-backup-fill",10);
+
+  let customs=[];
+  try{customs=JSON.parse(localStorage.getItem("plave_v2_custom")||"[]");}catch{}
+
+  if(!customs.length){
+    btn.textContent="📋 없음";setBar("custom-backup-fill",100);
+    setTimeout(()=>{btn.textContent="📋 수기 백업";btn.style.opacity="";btn.disabled=false;hideBar("custom-backup-bar");},1500);
+    return;
+  }
+
+  setBar("custom-backup-fill",40);
+  try{
+    await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"saveCustom",
+        live:customs.filter(c=>!c.type||c.type==="live"),
+        radio:customs.filter(c=>c.type==="radio"),
+        lassgo:customs.filter(c=>c.type==="lassgo")
+      })});
+    setBar("custom-backup-fill",100);
+    btn.textContent=`✅ ${customs.length}개 완료`;
+    setTimeout(()=>{btn.textContent="📋 수기 백업";btn.style.opacity="";btn.disabled=false;hideBar("custom-backup-bar");},2000);
+  }catch(e){
+    document.getElementById("custom-backup-fill").style.background="#ff5252";
+    setBar("custom-backup-fill",100);btn.textContent="❌ 실패";
+    setTimeout(()=>{btn.textContent="📋 수기 백업";btn.style.opacity="";btn.disabled=false;hideBar("custom-backup-bar");document.getElementById("custom-backup-fill").style.background="var(--noah)";},2000);
   }
 }
 const SHEET_ID = "1oiCW4x77Nt9ELOlhPwPh4PyHxyy7hmhKzhoSYnCKYd8";
@@ -1190,6 +1239,7 @@ const SHEETS_CONFIG = {
   live:   `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=1363997352`,
   radio:  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=78885417`,
   lassgo: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=829694958`,
+  tags:   `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=2079925808`,
 };
 
 /* CSV 파싱 (따옴표·쉼표 처리) */
@@ -1344,8 +1394,38 @@ async function loadFromSheets(){
         }
       }
     }
+    // 태그 시트 불러와서 localStorage 복원
+    if(cfg.tags){
+      const res = await fetch(cfg.tags);
+      if(res.ok){
+        const rows = parseCSV(await res.text());
+        rows.forEach(r=>{
+          const [sid,tagsA,tagsB,tagsC,links,videoUrl] = r;
+          if(!sid) return;
+          const key="plave_v2_"+sid;
+          // 기존 localStorage 데이터와 병합 (로컬이 더 최신이면 유지)
+          try{
+            const existing=JSON.parse(localStorage.getItem(key)||"{}");
+            const merged={
+              tagsA: (existing.tagsA&&existing.tagsA.length)?existing.tagsA:safeParseArr(tagsA),
+              tagsB: (existing.tagsB&&existing.tagsB.length)?existing.tagsB:safeParseArr(tagsB),
+              tagsC: (existing.tagsC&&existing.tagsC.length)?existing.tagsC:safeParseArr(tagsC),
+              links: (existing.links&&existing.links.length)?existing.links:safeParseArr(links),
+              videoUrl: existing.videoUrl||videoUrl||""
+            };
+            const hasData=merged.tagsA.length||merged.tagsB.length||merged.tagsC.length||merged.links.length||merged.videoUrl;
+            if(hasData) localStorage.setItem(key,JSON.stringify(merged));
+          }catch{}
+        });
+        if(rows.length) loaded=true;
+      }
+    }
   } catch(e){ console.warn("Sheets 로드 실패, 내장 데이터 사용:", e); }
   if(loaded) render();
+}
+
+function safeParseArr(str){
+  try{const v=JSON.parse(str||"[]");return Array.isArray(v)?v:[];}catch{return[];}
 }
 
 /* ── DATA ── */
