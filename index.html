@@ -535,7 +535,17 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 <main>
   <div class="result-count" id="result-count"></div>
   <div class="section-view active" id="view-live"><div id="live-content"></div></div>
-  <div class="section-view" id="view-radio"><div id="radio-content"></div></div>
+  <div class="section-view" id="view-radio">
+    <div id="radio-guest-filter" style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:10px;color:var(--muted);font-family:'Syne',sans-serif;letter-spacing:.1em;">게스트</span>
+      <div style="width:1px;height:14px;background:var(--border);"></div>
+      <button class="btn" id="radio-special-guest-btn" onclick="toggleSpecialGuest(this)"
+        style="font-size:11px;border-color:rgba(255,215,0,.35);color:#d4a800;">
+        ⭐ 특별게스트
+      </button>
+    </div>
+    <div id="radio-content"></div>
+  </div>
   <div class="section-view" id="view-lassgo"><div id="lassgo-content"></div></div>
 </main>
 
@@ -1150,7 +1160,7 @@ function savedExtras(id){
 /* ── APPS SCRIPT 웹훅 ──────────────────────────────────────────
    태그 백업용. Apps Script doPost에 saveTag 핸들러 추가 후 URL 입력
 ──────────────────────────────────────────────────────────────── */
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwHfVcFGpGvaiA7Ro-X-AneAXxu2mUw2qJ66ynG_TKVemblPHpHmQnJNJGMXIkmn3U/exec";
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwZUxDqYh5M83QwVFWtWwPDaR8IAaVxjGm4ML5CjHlX75VvOveCKjb9o6zPRc7yWjrO2g/exec";
 
 /* localStorage에서 태그 전체 수집 → 웹훅으로 일괄 전송 */
 /* ── 진행바 헬퍼 ── */
@@ -1927,6 +1937,7 @@ window.addEventListener("resize",updateStickyOffsets);
 
 function switchTab(t,btn){
   curTab=t;
+  resetSpecialGuest();
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
   document.querySelectorAll(".section-view").forEach(v=>v.classList.remove("active"));
@@ -2153,23 +2164,50 @@ function renderLive(){
 }
 
 /* ── render radio ── */
+function toggleSpecialGuest(btn){
+  curSpecialGuest=!curSpecialGuest;
+  if(curSpecialGuest){
+    btn.style.background="linear-gradient(#d4a800,#d4a800) padding-box,linear-gradient(90deg,#d4a800,#fff7aa,#d4a800) border-box";
+    btn.style.borderColor="transparent";
+    btn.style.color="#0b0b1e";
+  } else {
+    btn.style.background="";
+    btn.style.borderColor="rgba(255,215,0,.35)";
+    btn.style.color="#d4a800";
+  }
+  render();
+}
+function resetSpecialGuest(){
+  curSpecialGuest=false;
+  const btn=document.getElementById("radio-special-guest-btn");
+  if(btn){btn.style.background="";btn.style.borderColor="rgba(255,215,0,.35)";btn.style.color="#d4a800";}
+}
+
 function renderRadio(){
+  const MEMBERS=new Set(["예준","노아","밤비","은호","하민","전원"]);
   const f=R.filter(r=>{
     if(!matchYear(r.y))return false;
     if(!matchEra(r.y,r.d))return false;
+    // 멤버 필터: DJ + 게스트 포함 검색 (포함 방식)
     if(!curMemSet.has("all")){
-      if(!matchM(r.dj)&&!r.g.some(m=>curMemSet.has(m)))return false;
+      const allPeople=[...r.dj,...r.g];
+      const hit=allPeople.some(p=>curMemSet.has(p));
+      if(!hit)return false;
+    }
+    // 특별게스트 필터: g[]에 멤버 외 이름이 있는 것만
+    if(curSpecialGuest){
+      if(!r.g.some(g=>!MEMBERS.has(g)))return false;
     }
     if(curQ){
-      const sid=`radio_${R.indexOf(r)}`;
+      const sid=makeSid("radio",r.y,r.d,r.dj.join(""));
       const s=r.dj.join(" ")+" "+r.g.join(" ")+" "+r.y+"."+r.d;
       const q2=curQ.toLowerCase();
-      const inTitle=curTagMode==="exact"?s.toLowerCase()===q2:s.toLowerCase().includes(q2);
+      const inTitle=s.toLowerCase().includes(q2);
       const d=getData(sid);
       const inTags=[...d.tagsA,...d.tagsB,...d.tagsC].some(tag=>tag.toLowerCase().includes(q2));
       if(!inTitle&&!inTags)return false;
     }
-    if(curTagQ&&!matchTag(`radio_${R.indexOf(r)}`))return false;
+    if(curTagQ&&!matchTag(makeSid("radio",r.y,r.d,r.dj.join(""))))return false;
     return true;
   });
   document.getElementById("result-count").textContent=
