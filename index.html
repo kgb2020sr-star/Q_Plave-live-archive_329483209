@@ -674,9 +674,9 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
         </div>
         <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(168,85,247,.3);flex-shrink:0;">
           <button id="song-sort-desc" onclick="setSongSort('desc',this)"
-            style="padding:5px 10px;font-size:10px;font-weight:600;background:rgba(168,85,247,.12);color:#a855f7;border:none;cursor:pointer;border-radius:0;">최신순▼</button>
+            style="padding:5px 10px;font-size:10px;font-weight:600;background:transparent;color:var(--muted);border:none;cursor:pointer;border-radius:0;">최신순▼</button>
           <button id="song-sort-asc" onclick="setSongSort('asc',this)"
-            style="padding:5px 10px;font-size:10px;font-weight:600;background:transparent;color:var(--muted);border:none;border-left:1px solid rgba(168,85,247,.3);cursor:pointer;border-radius:0;">오래된순▲</button>
+            style="padding:5px 10px;font-size:10px;font-weight:600;background:rgba(168,85,247,.12);color:#a855f7;border:none;border-left:1px solid rgba(168,85,247,.3);cursor:pointer;border-radius:0;">오래된순▲</button>
         </div>
       </div>
 
@@ -2471,7 +2471,7 @@ function renderLassgo(){
    🎵 발매곡
 ══════════════════════════════════════════════ */
 let SONGS=[];
-let curSongAlbum="all", curSongYear="all", curSongType="all", curSongQ="", curSongSort="desc", curSongTagMode="include", curSongTitleOnly=false;
+let curSongAlbum="all", curSongYear="all", curSongType="all", curSongQ="", curSongSort="asc", curSongTagMode="include", curSongTitleOnly=false;
 
 function toggleSongSearchMode(){
   curSongTitleOnly=!curSongTitleOnly;
@@ -2514,7 +2514,7 @@ const SONG_ERA_STYLE={
 
 // 앨범명 → 시즌 매핑 (앨범명에 키워드 포함 시)
 const SONG_ERA_MAP=[
-  ["기다릴게","기다릴게"],["삼왜","삼왜"],["왜요","삼왜"],
+  ["기다릴게","기다릴게"],["ASTERUM","기다릴게"],["삼왜","삼왜"],["왜요","삼왜"],
   ["여름","여여름"],["ELENOI","여여름"],["Shape","여여름"],
   ["Merry","메리플리"],["PLLIstmas","메리플리"],
   ["134-1","웨사럽"],["WAY 4","웨사럽"],
