@@ -793,7 +793,12 @@ let curBcastAllActive=false; // 방송 라벨 토글 상태
 const BDAY_DATES=new Set(["02.10","03.12","05.24","06.19","07.15","09.12","11.01"]);
 const MILESTONE_RE=/100일|1000일|100회|200회|300회|회 특집/;
 function normD(d){if(!d)return d;const p=d.split(".");return p.length===2?p[0].padStart(2,"0")+"."+p[1].padStart(2,"0"):d;}
-function isSpecialBday(d){return BDAY_DATES.has(normD(d));}
+function nextDay(d){const [m,dd]=d.split(".").map(Number);const dt=new Date(2000,m-1,dd+1);return String(dt.getMonth()+1).padStart(2,"0")+"."+String(dt.getDate()).padStart(2,"0");}
+function isSpecialBday(d){
+  const nd=normD(d);
+  // 당일이 생일이거나, 당일의 다음날이 생일 (= 전날 라방)
+  return BDAY_DATES.has(nd)||BDAY_DATES.has(nextDay(nd));
+}
 function isSpecialMilestone(d,t){return !isSpecialBday(d)&&MILESTONE_RE.test(t);}
 function matchSpecial(d,t){
   if(curSpecial==="all")return true;
