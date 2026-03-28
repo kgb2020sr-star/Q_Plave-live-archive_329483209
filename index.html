@@ -2553,7 +2553,7 @@ function csvToSongs(rows){
   return rows.map(r=>{
     const [date,albumType,album,track,title,type,url]=[...r,...Array(7).fill("")];
     if(!title) return null;
-    return {date,albumType,album,track,title,type,url:url||""};
+    return {date,albumType,album,track,title,type,url:(url||"").trim()};
   }).filter(Boolean);
 }
 
@@ -2623,7 +2623,7 @@ function renderSongs(){
       const sid=`song_${s.date}_${(s.title||"").replace(/[^가-힣a-zA-Z0-9]/g,"").slice(0,15)}`;
       const bc=getSongBadgeClass(s.type);
       const bl=getSongBadgeLabel(s.type);
-      const ytId=s.url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
+      const ytId=(s.url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
       const thumb=ytId?`https://i.ytimg.com/vi/${ytId[1]}/mqdefault.jpg`:"";
       const bgStyle=thumb?`background-image:url('${thumb}')`:(`background:${st.bg}`);
       return`<div class="song-card" onclick="openSongModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">
