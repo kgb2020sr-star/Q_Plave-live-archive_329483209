@@ -2014,7 +2014,7 @@ function renderLive(){
         const isBday=isSpecialBday(b.d);
         const isMilestone=isSpecialMilestone(b.d,b.t);
         const specialCls=isBday?"special-bday":isMilestone?"special-milestone":"";
-        return`<div class="card ${cc(b.m)}${isDebut?' season-debut':''}${specialCls?' '+specialCls:''}" data-sid="${escH(sid)}" data-title="${escH(b.t)}" data-date="${yy}.${b.d}" data-type="live">`
+        return`<div class="card ${cc(b.m)}${isDebut?' season-debut':''}${specialCls?' '+specialCls:''}" data-sid="${escH(sid)}" data-title="${escH(b.t)}" data-date="${yy}.${b.d}" data-type="live">
           ${isDebut?`<div style="font-size:10px;font-weight:700;color:#e8c97a;letter-spacing:.08em;margin-bottom:5px;">✦ ${escH(eraLabel)}</div>`:''}
           ${isBday&&!isDebut?`<div style="font-size:10px;font-weight:700;color:#2dd4bf;letter-spacing:.08em;margin-bottom:5px;">🎂 생일</div>`:''}
           ${isMilestone&&!isDebut&&!isBday?`<div style="font-size:10px;font-weight:700;color:#2dd4bf;letter-spacing:.08em;margin-bottom:5px;">✦ 기념</div>`:''}
@@ -2124,7 +2124,7 @@ function renderRadio(){
         const rThumbHtml=rthumb
           ?`<a class="card-thumb-link" href="${escH(vurl||'#')}" target="_blank" onclick="event.stopPropagation()"><img src="${escH(rthumb)}" onerror="window.thumbErr&&window.thumbErr(this)" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></a>`
           :`<div class="card-thumb-empty">📻</div>`;
-        return`<div class="card ${cc(r.dj)}" data-sid="${escH(sid)}" data-title="${escH(cardTitle)}" data-date="${yy}.${r.d}" data-type="radio">`
+        return`<div class="card ${cc(r.dj)}" data-sid="${escH(sid)}" data-title="${escH(cardTitle)}" data-date="${yy}.${r.d}" data-type="radio">
           <div class="card-with-thumb">
             ${rThumbHtml}
             <div class="card-body-wrap">
@@ -2213,7 +2213,7 @@ function renderUnifiedCard(item,yy){
     memberPills="";
   }
   const colorClass=type==="live"?cc(item.m||[]):type==="radio"?cc(item.dj||[]):"c-all";
-  return`<div class="card ${colorClass}" data-sid="${escH(sid)}" data-title="${escH(title)}" data-date="${yy}.${item.d}" data-type="${type}">`
+  return`<div class="card ${colorClass}" data-sid="${escH(sid)}" data-title="${escH(title)}" data-date="${yy}.${item.d}" data-type="${type}">
     <div class="card-with-thumb">
       ${thumbHtml}
       <div class="card-body-wrap">
@@ -2340,7 +2340,7 @@ function renderLassgo(){
         const pThumbHtml=pthumb
           ?`<a class="card-thumb-link" href="${escH(pvurl||'#')}" target="_blank" onclick="event.stopPropagation()"><img src="${escH(pthumb)}" onerror="window.thumbErr&&window.thumbErr(this)" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></a>`
           :`<div class="card-thumb-empty">🚀</div>`;
-        return`<div class="card c-all" data-sid="${escH(sid)}" data-title="${escH(p.t)}" data-date="${p.y}.${p.d}" data-type="lassgo">`
+        return`<div class="card c-all" data-sid="${escH(sid)}" data-title="${escH(p.t)}" data-date="${p.y}.${p.d}" data-type="lassgo">
           <div class="card-with-thumb">
             ${pThumbHtml}
             <div class="card-body-wrap">
