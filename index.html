@@ -2570,7 +2570,8 @@ function csvToSongs(rows){
     const url=(r[8]||"").trim();
     if(!title) return null;
     if((r[0]||"").trim()) lastDate=(r[0]||"").trim();
-    if((r[1]||"").trim()) lastAlbumType=(r[1]||"").trim();
+    const rawAlbumType=(r[1]||"").trim();
+    if(rawAlbumType&&!rawAlbumType.startsWith("http")) lastAlbumType=rawAlbumType;
     if((r[2]||"").trim()) lastAlbum=(r[2]||"").trim();
     return {date,albumType,album,track,title,type,url};
   }).filter(Boolean);
@@ -2653,7 +2654,7 @@ function renderSongs(){
           <div class="song-thumb-blur" style="${bgStyle};"></div>
           ${thumb?`<div class="song-thumb-img"><img src="${escH(thumb)}" onerror="this.style.display='none'" alt=""></div>`:'<div class="song-thumb-ph">🎵</div>'}
           <div class="song-top-badges">
-            ${albumType?`<span class="song-badge" style="background:${st.bg};color:${st.text};border:1px solid ${st.border};">${escH(albumType)}</span>`:""}
+            ${albumType&&!albumType.startsWith("http")?`<span class="song-badge" style="background:${st.bg};color:${st.text};border:1px solid ${st.border};">${escH(albumType)}</span>`:""}
             <span class="song-badge ${bc}">${bl}</span>
           </div>
           ${s.url?'<div class="song-link-icon">🔗</div>':""}
