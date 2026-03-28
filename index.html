@@ -58,7 +58,7 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
 .tab-btn.active{color:var(--text);border-bottom-color:var(--noah);}
 
 .controls{position:sticky;top:44px;z-index:99;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 20px;}
-#filters-collapsible{transition:max-height .3s ease,opacity .3s ease;overflow:hidden;max-height:600px;opacity:1;}
+#filters-collapsible{transition:max-height .12s ease,opacity .1s ease;overflow:hidden;max-height:600px;opacity:1;}
 #filters-collapsible.collapsed{max-height:0!important;opacity:0;}
 .controls-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
 .search-row{position:relative;}
@@ -423,7 +423,8 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 </div>
 
 <!-- 연동하기 고정 바 (최상단 단독) -->
-<div style="position:fixed;top:0;right:0;left:0;z-index:999;display:flex;justify-content:flex-end;align-items:center;padding:6px 16px;background:rgba(11,11,30,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);">
+<div style="position:fixed;top:0;right:0;left:0;z-index:999;display:flex;justify-content:flex-end;align-items:center;gap:12px;padding:6px 16px;background:rgba(11,11,30,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);">
+  <span id="sync-status" style="font-size:10px;font-weight:400;color:rgba(255,255,255,.35);font-family:'Noto Sans KR',sans-serif;"></span>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:100px;">
     <button id="sync-btn" onclick="syncAll()"
       style="background:rgba(232,201,122,.15);border:1px solid rgba(232,201,122,.4);border-radius:7px;
@@ -1329,154 +1330,22 @@ function showBar(barId,fillId){document.getElementById(barId).style.display="";s
 function setBar(fillId,pct){document.getElementById(fillId).style.width=pct+"%";}
 function hideBar(barId){setTimeout(()=>{document.getElementById(barId).style.display="none";},600);}
 
-async function backupTagsToSheets(){
-  const btn=document.getElementById("tag-backup-btn");
-  if(!WEBHOOK_URL){alert("WEBHOOK_URL이 설정되지 않았어요.");return;}
-  btn.textContent="🏷️ 수집 중...";btn.style.opacity=".5";btn.disabled=true;
-  showBar("tag-backup-bar","tag-backup-fill");
-  setBar("tag-backup-fill",10);
 
-  const allTags=[];
-  for(let i=0;i<localStorage.length;i++){
-    const key=localStorage.key(i);
-    if(!key||!key.startsWith("plave_v2_"))continue;
-    try{
-      const d=JSON.parse(localStorage.getItem(key)||"{}");
-      const hasData=(d.tagsA&&d.tagsA.length)||(d.tagsB&&d.tagsB.length)||
-                    (d.tagsC&&d.tagsC.length)||(d.links&&d.links.length)||d.videoUrl;
-      if(hasData) allTags.push({sid:key.replace("plave_v2_",""),...d});
-    }catch{}
-  }
-
-  if(!allTags.length){
-    btn.textContent="🏷️ 태그 없음";setBar("tag-backup-fill",100);
-    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;hideBar("tag-backup-bar");},1500);
-    return;
-  }
-
-  try{
-    const CHUNK=20,total=allTags.length;
-    for(let i=0;i<total;i+=CHUNK){
-      await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:"saveTags",tags:allTags.slice(i,i+CHUNK)})});
-      setBar("tag-backup-fill",10+Math.round((Math.min(i+CHUNK,total)/total)*85));
-      if(i+CHUNK<total)await new Promise(r=>setTimeout(r,300));
-    }
-    setBar("tag-backup-fill",100);
-    btn.textContent=`✅ ${total}개 완료`;
-    writeLog("태그 백업",`${total}개 백업 완료`);
-    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;hideBar("tag-backup-bar");},2000);
-  }catch(e){
-    document.getElementById("tag-backup-fill").style.background="#ff5252";
-    setBar("tag-backup-fill",100);btn.textContent="❌ 실패";
-    setTimeout(()=>{btn.textContent="🏷️ 태그 백업";btn.style.opacity="";btn.disabled=false;hideBar("tag-backup-bar");document.getElementById("tag-backup-fill").style.background="#2dd4bf";},2000);
-  }
-}
-
-/* ── 백업하기 (태그 + 수기 추가 통합) ── */
-async function backupAll(){
-  const btn=document.getElementById("tag-backup-btn");
-  if(!WEBHOOK_URL){alert("WEBHOOK_URL이 설정되지 않았어요.");return;}
-  btn.textContent="💾 수집 중...";btn.style.opacity=".5";btn.disabled=true;
-  showBar("tag-backup-bar","tag-backup-fill");
-  setBar("tag-backup-fill",10);
-
-  // 태그 수집
-  const allTags=[];
-  for(let i=0;i<localStorage.length;i++){
-    const key=localStorage.key(i);
-    if(!key||!key.startsWith("plave_v2_")||key==="plave_v2_custom")continue;
-    try{
-      const d=JSON.parse(localStorage.getItem(key)||"{}");
-      const hasData=(d.tagsA&&d.tagsA.length)||(d.tagsB&&d.tagsB.length)||
-                    (d.tagsC&&d.tagsC.length)||(d.links&&d.links.length)||d.videoUrl||(d.tags&&d.tags.length);
-      if(hasData) allTags.push({sid:key.replace("plave_v2_",""),...d});
-    }catch{}
-  }
-  setBar("tag-backup-fill",25);
-
-  // 수기 추가 방송 수집
-  let customs=[];
-  try{customs=JSON.parse(localStorage.getItem("plave_v2_custom")||"[]");}catch{}
-  setBar("tag-backup-fill",35);
-
-  try{
-    // 태그 전송 (20개씩)
-    const CHUNK=20,total=allTags.length;
-    for(let i=0;i<Math.max(total,1);i+=CHUNK){
-      if(total>0){
-        await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({action:"saveTags",tags:allTags.slice(i,i+CHUNK)})});
-      }
-      setBar("tag-backup-fill",35+Math.round((Math.min(i+CHUNK,total||1)/(total||1))*40));
-      if(i+CHUNK<total) await new Promise(r=>setTimeout(r,300));
-    }
-    setBar("tag-backup-fill",78);
-
-    // 수기 추가 전송
-    if(customs.length){
-      await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:"saveCustom",
-          live:customs.filter(c=>!c.type||c.type==="live"),
-          radio:customs.filter(c=>c.type==="radio"),
-          lassgo:customs.filter(c=>c.type==="lassgo")
-        })});
-    }
-    setBar("tag-backup-fill",100);
-    writeLog("백업하기",`태그 ${allTags.length}개, 수기추가 ${customs.length}개`);
-    btn.textContent=`✅ 완료 (태그 ${allTags.length}개${customs.length?` + 수기 ${customs.length}개`:""})`;
-    setTimeout(()=>{btn.textContent="💾 백업하기";btn.style.opacity="";btn.disabled=false;hideBar("tag-backup-bar");},2500);
-  }catch(e){
-    document.getElementById("tag-backup-fill").style.background="#ff5252";
-    setBar("tag-backup-fill",100);btn.textContent="❌ 실패";
-    setTimeout(()=>{btn.textContent="💾 백업하기";btn.style.opacity="";btn.disabled=false;hideBar("tag-backup-bar");
-      document.getElementById("tag-backup-fill").style.background="#2dd4bf";},2000);
-  }
-}
 
 /* ── 연동하기 (시트 동기화 + 태그 복원 + 로그) ── */
 async function syncAll(){
   const btn=document.getElementById("sync-btn");
-  btn.textContent="🔄 연동 중...";btn.style.opacity=".5";btn.disabled=true;
-  showBar("sync-bar","sync-fill"); setBar("sync-fill",5);
+  const status=document.getElementById("sync-status");
+  const setStatus=t=>{if(status)status.textContent=t;};
+  btn.style.opacity=".5";btn.disabled=true;
+  showBar("sync-bar","sync-fill");setBar("sync-fill",5);
 
-  // 1단계: 시트에서 최신 데이터 fetch (항상 실행)
-  btn.textContent="시트 불러오는 중...";
-  try{ await loadFromSheets(); }catch(e){console.warn("시트 동기화 실패",e);}
-  setBar("sync-fill",40);
-
-  // 2단계: 태그/백업/로그 (WEBHOOK_URL 있을 때만)
-  if(WEBHOOK_URL){
-    btn.textContent="태그 백업 중...";
-    const allTags=[];
-    for(let i=0;i<localStorage.length;i++){
-      const key=localStorage.key(i);
-      if(!key||!key.startsWith("plave_v2_")||key==="plave_v2_custom")continue;
-      try{
-        const d=JSON.parse(localStorage.getItem(key)||"{}");
-        const hasData=(d.tagsA&&d.tagsA.length)||(d.tagsB&&d.tagsB.length)||
-                      (d.tagsC&&d.tagsC.length)||(d.links&&d.links.length)||d.videoUrl||(d.tags&&d.tags.length);
-        if(hasData) allTags.push({sid:key.replace("plave_v2_",""),...d});
-      }catch{}
-    }
-    setBar("sync-fill",55);
-    try{
-      const CHUNK=20,total=allTags.length;
-      for(let i=0;i<Math.max(total,1);i+=CHUNK){
-        if(total>0){
-          await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({action:"saveTags",tags:allTags.slice(i,i+CHUNK)})});
-        }
-        setBar("sync-fill",55+Math.round((Math.min(i+CHUNK,total||1)/(total||1))*35));
-        if(i+CHUNK<total) await new Promise(r=>setTimeout(r,300));
-      }
-    }catch(e){console.warn("태그 전송 실패",e);}
-    await writeLog("연동하기",`시트 동기화 + 태그 ${allTags.length}개`);
-  }
+  setStatus("라이브 불러오는 중");
+  try{ await loadFromSheets(setStatus); }catch(e){console.warn("시트 동기화 실패",e);}
 
   setBar("sync-fill",100);
-  btn.textContent="✅ 완료";
-  setTimeout(()=>{btn.textContent="🔄 연동하기";btn.style.opacity="";btn.disabled=false;hideBar("sync-bar");},2000);
+  setStatus("");
+  btn.style.opacity="";btn.disabled=false;hideBar("sync-bar");
 }
 const SHEET_ID = "1oiCW4x77Nt9ELOlhPwPh4PyHxyy7hmhKzhoSYnCKYd8";
 const SHEETS_CONFIG = {
@@ -1553,26 +1422,14 @@ function csvToLassgo(rows){
 }
 
 /* Sheets에서 데이터 로드 후 렌더링 */
-async function refreshFromSheets(){
-  const btn=document.getElementById("sheets-refresh-btn");
-  btn.textContent="↻ 로딩 중...";
-  btn.style.opacity=".5";
-  btn.disabled=true;
-  try{
-    await loadFromSheets();
-    writeLog("시트 동기화","데이터 새로고침 완료");
-    btn.textContent="✅ 완료";
-    setTimeout(()=>{btn.textContent="↻ 시트 동기화";btn.style.opacity="";btn.disabled=false;},1500);
-  }catch(e){
-    btn.textContent="❌ 실패";
-    setTimeout(()=>{btn.textContent="↻ 시트 동기화";btn.style.opacity="";btn.disabled=false;},2000);
-  }
-}
-async function loadFromSheets(){
+
+async function loadFromSheets(onStatus){
+  const st=onStatus||((t)=>{});
   const cfg = SHEETS_CONFIG;
   let loaded = false;
   try {
     if(cfg.live){
+      st("라이브 불러오는 중");
       const res = await fetch(cfg.live);
       if(res.ok){
         const rows = parseCSV(await res.text());
@@ -1610,6 +1467,7 @@ async function loadFromSheets(){
       }
     }
     if(cfg.radio){
+      st("라디오 불러오는 중");
       const res = await fetch(cfg.radio);
       if(res.ok){
         const rows = parseCSV(await res.text());
@@ -1633,6 +1491,7 @@ async function loadFromSheets(){
       }
     }
     if(cfg.lassgo){
+      st("라쓰고 불러오는 중");
       const res = await fetch(cfg.lassgo);
       if(res.ok){
         const rows = parseCSV(await res.text());
@@ -1655,6 +1514,7 @@ async function loadFromSheets(){
     }
     // 태그 시트 불러와서 localStorage 복원
     if(cfg.tags){
+      st("태그 불러오는 중");
       const res = await fetch(cfg.tags);
       if(res.ok){
         const rows = parseCSV(await res.text());
@@ -1850,8 +1710,8 @@ function submitAddLive(){
   document.querySelector(".tab-btn").classList.add("active");
   curTab="live";
   document.querySelectorAll(".section-view").forEach(v=>v.classList.remove("active"));
-  document.getElementById("view-live").classList.add("active");
-  renderLive();
+  document.getElementById("view-broadcast").classList.add("active");
+  render();
   alert(`✅ "${title}" 추가됐어요!\n⚠️ 새로고침하면 사라지니, 다음에도 쓰려면 엑셀로 전달해주세요.`);
 }
 
@@ -1955,8 +1815,6 @@ function resetEra(){
   document.querySelectorAll("#era-filters .btn").forEach(b=>b.classList.remove("active"));
   render();
 }
-const SPECIAL_ACTIVE_STYLE="";
-
 function setSpecial(btn){
   if(btn.classList.contains("active")){
     btn.classList.remove("active");
