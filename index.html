@@ -58,8 +58,10 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
 .tab-btn.active{color:var(--text);border-bottom-color:var(--noah);}
 
 .controls{position:sticky;top:44px;z-index:99;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 20px;}
-#filters-collapsible{transition:max-height .12s ease,opacity .1s ease;overflow:hidden;max-height:600px;opacity:1;}
+#filters-collapsible{transition:max-height .18s cubic-bezier(0.4,0,0.2,1),opacity .15s ease;overflow:hidden;max-height:300px;opacity:1;position:relative;}
 #filters-collapsible.collapsed{max-height:0!important;opacity:0;}
+#filters-collapsible::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to bottom,transparent,var(--bg));opacity:0;pointer-events:none;transition:opacity .1s ease;z-index:1;}
+#filters-collapsible.collapsing::after{opacity:1;}
 .controls-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
 .search-row{position:relative;}
 .search-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
@@ -88,6 +90,8 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
 .filter-label{font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:600;
   color:rgba(255,255,255,.3);white-space:nowrap;}
 .filter-label-btn{white-space:nowrap;transition:color .15s;}
+.era-scroll{overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap!important;scrollbar-width:none;-ms-overflow-style:none;min-width:0;}
+.era-scroll::-webkit-scrollbar{display:none;}
 /* 생일: 미선택=흐림, 선택=민트 테두리만 */
 .btn.btn-special{border:1px solid rgba(255,255,255,.12) !important;color:rgba(255,255,255,.3) !important;background:transparent !important;}
 .btn.btn-special.active{border:1px solid #2dd4bf !important;color:#2dd4bf !important;background:transparent !important;}
@@ -395,13 +399,13 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 <header>
   <div class="logo-title">PLAVE ARCHIVE</div>
   <div class="logo-sub">라이브 방송 · 라디오 아카이브</div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num" id="stat-live">—</div><div class="stat-label">라이브 방송</div></div>
+    <div class="stat"><div class="stat-num" id="stat-radio">—</div><div class="stat-label">라디오 회차</div></div>
+    <div class="stat"><div class="stat-num" id="stat-lassgo">—</div><div class="stat-label">라쓰고 플레이브</div></div>
+    <div class="stat"><div class="stat-num" id="stat-songs">—</div><div class="stat-label">발매곡</div></div>
+  </div>
 </header>
-<div class="stats-row">
-  <div class="stat"><div class="stat-num" id="stat-live">—</div><div class="stat-label">라이브 방송</div></div>
-  <div class="stat"><div class="stat-num" id="stat-radio">—</div><div class="stat-label">라디오 회차</div></div>
-  <div class="stat"><div class="stat-num" id="stat-lassgo">—</div><div class="stat-label">라쓰고 플레이브</div></div>
-  <div class="stat"><div class="stat-num" id="stat-songs">—</div><div class="stat-label">발매곡</div></div>
-</div>
 
 <div class="tab-bar">
   <div class="tab-row">
@@ -617,8 +621,8 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
     <!-- 시즌 -->
     <div class="filter-row-labeled" style="align-items:flex-start;">
       <button class="filter-label filter-label-btn grad-border" onclick="resetEra()" title="시즌 초기화">시즌</button>
-      <div class="filter-sep" style="height:54px;align-self:center;"></div>
-      <div class="era-scroll" id="era-filters" style="flex:1;display:flex;flex-wrap:wrap;gap:5px;">
+      <div class="filter-sep" style="height:22px;align-self:center;"></div>
+      <div class="era-scroll" id="era-filters" style="flex:1;display:flex;gap:5px;">
         <button class="btn btn-comeback" data-era="comeback" onclick="setEra(this)">✦ 컴백</button>
         <button class="btn btn-era" data-era="22연생뱅" onclick="setEra(this)">22연생뱅</button>
         <button class="btn btn-era" data-era="23연생뱅" onclick="setEra(this)">23연생뱅</button>
@@ -1741,15 +1745,20 @@ function toggleFilters(forceClose){
   const arrow=document.getElementById("filter-toggle-arrow");
   if(!el||!arrow) return;
   if(forceClose===true||(forceClose===undefined&&filtersOpen)){
-    el.classList.add("collapsed");
+    el.classList.add("collapsing");
+    requestAnimationFrame(()=>{
+      el.classList.add("collapsed");
+      setTimeout(()=>el.classList.remove("collapsing"),180);
+    });
     arrow.textContent="▼";
     filtersOpen=false;
   } else {
     el.classList.remove("collapsed");
+    el.classList.remove("collapsing");
     arrow.textContent="▲";
     filtersOpen=true;
   }
-  setTimeout(updateStickyOffsets,300);
+  setTimeout(updateStickyOffsets,220);
 }
 document.addEventListener("DOMContentLoaded",()=>{
   // 초기 펼친 상태
@@ -1760,12 +1769,9 @@ let lastScrollY=0;
 let scrollTimer=null;
 window.addEventListener("scroll",()=>{
   const sy=window.scrollY;
-  if(scrollTimer) clearTimeout(scrollTimer);
-  scrollTimer=setTimeout(()=>{
-    if(sy>lastScrollY&&sy>10&&filtersOpen) toggleFilters(true);
-    if(sy<=0&&!filtersOpen) toggleFilters(false);
-    lastScrollY=sy;
-  },80);
+  if(sy>lastScrollY&&sy>10&&filtersOpen) toggleFilters(true);
+  if(sy<=0&&!filtersOpen) toggleFilters(false);
+  lastScrollY=sy;
 },{passive:true});
 
 function updateStickyOffsets(){
