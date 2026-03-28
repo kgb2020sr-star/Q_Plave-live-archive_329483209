@@ -945,7 +945,9 @@ function openEdit(id,title,dateStr,type){
     thumbWrap.style.display="none";
   }
   renderAllTags();
-  document.getElementById("edit-modal").classList.add("open");
+  const modal=document.getElementById("edit-modal");
+  document.body.appendChild(modal);
+  modal.classList.add("open");
 }
 function closeModal(){
   document.getElementById("edit-modal").classList.remove("open");
