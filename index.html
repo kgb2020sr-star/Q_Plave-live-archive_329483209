@@ -1441,6 +1441,9 @@ async function syncAll(){
   setStatus("라이브 불러오는 중");
   try{ await loadFromSheets(setStatus); }catch(e){console.warn("시트 동기화 실패",e);}
 
+  setStatus("발매곡 불러오는 중");
+  try{ await loadSongsFromSheet(); }catch(e){console.warn("발매곡 동기화 실패",e);}
+
   setBar("sync-fill",100);
   setStatus("");
   btn.style.opacity="";btn.disabled=false;hideBar("sync-bar");
