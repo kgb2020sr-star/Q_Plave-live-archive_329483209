@@ -13,7 +13,7 @@
   --border:rgba(255,255,255,0.07);--text:#e8e8f0;--muted:#8888aa;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-top:44px;}
 body::before{content:'';position:fixed;inset:0;
   background-image:
     radial-gradient(1px 1px at 15% 20%,rgba(255,255,255,.4) 0%,transparent 100%),
@@ -57,7 +57,7 @@ header{position:sticky;top:0;z-index:101;background:rgba(6,6,17,.96);backdrop-fi
 .tab-btn.active{color:var(--text);border-bottom-color:var(--noah);}
 
 .controls{background:rgba(6,6,17,.9);border-bottom:1px solid var(--border);padding:10px 20px;
-  position:sticky;top:41px;z-index:99;backdrop-filter:blur(8px);}
+  position:sticky;top:44px;z-index:99;backdrop-filter:blur(8px);}
 .controls-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
 .search-row{position:relative;}
 .search-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
@@ -67,28 +67,37 @@ header{position:sticky;top:0;z-index:101;background:rgba(6,6,17,.96);backdrop-fi
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
 .filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .filter-divider{width:1px;height:18px;background:var(--border);align-self:center;}
-.btn{border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-family:'Noto Sans KR',sans-serif;
-  font-size:11px;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;white-space:nowrap;}
-.btn:hover{background:var(--bg3);color:var(--text);}
-.btn.active{color:#fff;background:var(--bg3);border-color:currentColor;}
-.btn-yejun.active{color:var(--yejun);border-color:var(--yejun);}
-.btn-noah.active{color:var(--noah);border-color:var(--noah);}
-.btn-bambi.active{color:var(--bambi);border-color:var(--bambi);}
-.btn-eunho.active{color:var(--eunho);border-color:var(--eunho);}
-.btn-special{border-color:rgba(45,212,191,.35);color:#2dd4bf;}
-.btn.btn-special:hover{
-  background:linear-gradient(#2dd4bf,#2dd4bf) padding-box,
-    linear-gradient(90deg,#2dd4bf,#a7f3d0,#2dd4bf) border-box;
-  border-color:transparent;color:#0b0b1e;}
-.filter-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.12em;
-  color:var(--muted);text-transform:uppercase;white-space:nowrap;min-width:36px;padding-top:4px;}
-.filter-label-btn{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:.12em;
-  color:var(--muted);text-transform:uppercase;white-space:nowrap;min-width:36px;
-  background:none;border:none;cursor:pointer;padding:4px 0 0;text-align:left;
-  transition:color .15s;}
-.filter-label-btn:hover{color:var(--text);}
-.filter-sep{width:1px;height:18px;background:rgba(255,255,255,.1);flex-shrink:0;align-self:center;}
-.filter-row-labeled{display:flex;align-items:flex-start;gap:10px;}
+.btn{border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:4px 11px;font-family:'Noto Sans KR',sans-serif;
+  font-size:11px;cursor:pointer;background:transparent;color:rgba(255,255,255,.3);transition:all .15s;white-space:nowrap;}
+.btn:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);}
+.btn.active{color:#fff;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);}
+.btn-yejun.active{color:var(--yejun);border-color:var(--yejun);background:rgba(77,166,255,.1);}
+.btn-noah.active{color:var(--noah);border-color:var(--noah);background:rgba(168,85,247,.1);}
+.btn-bambi.active{color:var(--bambi);border-color:var(--bambi);background:rgba(255,107,157,.1);}
+.btn-eunho.active{color:var(--eunho);border-color:var(--eunho);background:rgba(255,82,82,.1);}
+.btn-hamin.active{color:var(--hamin);border-color:var(--hamin);background:rgba(82,204,122,.1);}
+.btn-all.active{color:#fff;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.4);}
+/* grad-border: .btn과 세로 동일, 가로 넓게, 흰색 텍스트 */
+.grad-border{color:#ffffff !important;border:1.5px solid transparent;
+  border-radius:8px;padding:4px 18px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;
+  font-size:11px;font-weight:600;min-width:48px;text-align:center;
+  background:linear-gradient(#0d0d1e,#0d0d1e) padding-box,
+    linear-gradient(160deg,#4da6ff,#a855f7,#ff6b9d,#ff5252,#f97316,#84cc16) border-box;}
+.filter-label{font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:600;
+  color:rgba(255,255,255,.3);white-space:nowrap;}
+.filter-label-btn{white-space:nowrap;transition:color .15s;}
+/* 생일: 미선택=흐림, 선택=민트 테두리만 */
+.btn.btn-special{border:1px solid rgba(255,255,255,.12) !important;color:rgba(255,255,255,.3) !important;background:transparent !important;}
+.btn.btn-special.active{border:1px solid #2dd4bf !important;color:#2dd4bf !important;background:transparent !important;}
+.btn.btn-special:hover{color:rgba(255,255,255,.7) !important;background:rgba(255,255,255,.04) !important;}
+/* 컴백: 미선택=흐림, 선택=골드 테두리만 */
+.btn.btn-comeback{border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.3);background:transparent;}
+.btn.btn-comeback.active{border:1px solid #e8c97a !important;color:#e8c97a !important;background:transparent !important;}
+.btn.btn-comeback:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.04);}
+.filter-sep{width:1px;background:rgba(255,255,255,.1);flex-shrink:0;height:22px;align-self:center;}
+.filter-row-labeled{display:flex;align-items:center;gap:10px;}
+.filter-row-labeled>*{align-self:flex-start;}
+.filter-row-labeled>.filter-sep{align-self:center;}
 .card.special-bday{box-shadow:0 0 0 1.5px rgba(45,212,191,.6),0 0 16px rgba(45,212,191,.2);}
 .card.special-bday::before{opacity:1!important;background:linear-gradient(90deg,#2dd4bf,#a7f3d0,#2dd4bf)!important;}
 .card.special-milestone{box-shadow:0 0 0 1.5px rgba(45,212,191,.6),0 0 16px rgba(45,212,191,.2);}
@@ -119,14 +128,6 @@ header{position:sticky;top:0;z-index:101;background:rgba(6,6,17,.96);backdrop-fi
 .era-뿌우.active,.era-뿌우:hover{background:rgba(30,58,138,.35);}
 .era-뿌우크리.active,.era-뿌우크리:hover{background:rgba(248,113,113,.35);}
 .era-칼파투.active,.era-칼파투:hover{background:rgba(220,38,38,.35);}
-.btn-comeback{background:linear-gradient(var(--bg2,#0b0b1e),var(--bg2,#0b0b1e)) padding-box,
-  linear-gradient(90deg,#e8c97a,#fff7d6,#e8c97a) border-box;
-  border:1px solid transparent;color:#e8c97a;}
-.btn-comeback:hover{background:linear-gradient(#e8c97a,#e8c97a) padding-box,
-  linear-gradient(90deg,#e8c97a,#fff7d6,#e8c97a) border-box;color:#0b0b1e;}
-.btn-comeback.active{background:linear-gradient(#e8c97a,#e8c97a) padding-box,
-  linear-gradient(90deg,#e8c97a,#fff7d6,#e8c97a) border-box;
-  border:1px solid transparent;color:#0b0b1e;}
 
 main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16px 60px;}
 .result-count{font-size:11px;color:var(--muted);margin-bottom:12px;padding:0 2px;}
@@ -379,27 +380,34 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
   .song-modal-box{flex-direction:column;}
   .song-modal-left{width:100%;height:160px;}
 }
+/* ── 그라데이션 테두리 (로고 컬러) ── */
+/* ── 방송 타입 버튼 ── */
+.btn-bcast{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--muted);font-size:11px;font-weight:600;font-family:'Noto Sans KR',sans-serif;padding:5px 12px;cursor:pointer;transition:all .15s;}
+.btn-bcast.active{background:rgba(77,166,255,.12);border-color:rgba(77,166,255,.4);color:#4da6ff;}
+.btn-bcast[data-bcast="radio"].active{background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.4);color:#a855f7;}
+.btn-bcast[data-bcast="lassgo"].active{background:rgba(255,183,77,.12);border-color:rgba(255,183,77,.4);color:#ffb74d;}
+#search-mode-btn.title-only{background:rgba(77,166,255,.15);border-color:rgba(77,166,255,.4);color:#4da6ff;}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--muted);font-size:13px;gap:8px;}
+.empty-icon{display:none;}
 </style>
 <body>
 
 <header>
   <div class="logo-title">PLAVE ARCHIVE</div>
   <div class="logo-sub">라이브 방송 · 라디오 아카이브</div>
-  <div class="stats-row">
-    <div class="stat"><div class="stat-num" id="stat-live">—</div><div class="stat-label">라이브 방송</div></div>
-    <div class="stat"><div class="stat-num" id="stat-radio">—</div><div class="stat-label">라디오 회차</div></div>
-    <div class="stat"><div class="stat-num" id="stat-lassgo">—</div><div class="stat-label">라쓰고 플레이브</div></div>
-    <div class="stat"><div class="stat-num" id="stat-songs">—</div><div class="stat-label">발매곡</div></div>
-  </div>
 </header>
+<div class="stats-row">
+  <div class="stat"><div class="stat-num" id="stat-live">—</div><div class="stat-label">라이브 방송</div></div>
+  <div class="stat"><div class="stat-num" id="stat-radio">—</div><div class="stat-label">라디오 회차</div></div>
+  <div class="stat"><div class="stat-num" id="stat-lassgo">—</div><div class="stat-label">라쓰고 플레이브</div></div>
+  <div class="stat"><div class="stat-num" id="stat-songs">—</div><div class="stat-label">발매곡</div></div>
+</div>
 
 <div class="tab-bar">
   <div class="tab-row">
     <div style="display:flex;">
-      <button class="tab-btn active" onclick="switchTab('live',this)">📺 라이브 방송</button>
-      <button class="tab-btn" onclick="switchTab('radio',this)">📻 라디오</button>
-      <button class="tab-btn" onclick="switchTab('lassgo',this)">🚀 라쓰고</button>
-      <button class="tab-btn" onclick="switchTab('songs',this)">🎵 발매곡</button>
+      <button class="tab-btn active" onclick="switchTab('broadcast',this)">🛸 방송</button>
+      <button class="tab-btn" onclick="switchTab('songs',this)">💿 발매곡</button>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <!-- 백업하기 (태그 + 수기 추가 통합) -->
@@ -414,19 +422,21 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
   </div>
 </div>
 
-<!-- 연동하기 고정 버튼 (우측 상단) -->
-<div id="sync-fixed-wrap" style="position:fixed;top:14px;right:18px;z-index:900;display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
-  <button id="sync-btn" onclick="syncAll()"
-    style="background:rgba(232,201,122,.15);border:1px solid rgba(232,201,122,.4);border-radius:8px;
-           color:#e8c97a;font-size:11px;font-weight:600;padding:6px 14px;cursor:pointer;
-           font-family:'Syne',sans-serif;letter-spacing:.06em;white-space:nowrap;
-           transition:background .15s;"
-    onmouseover="this.style.background='rgba(232,201,122,.28)'"
-    onmouseout="this.style.background='rgba(232,201,122,.15)'">🔄 연동하기</button>
-  <div id="sync-bar" style="display:none;width:100%;height:3px;border-radius:2px;background:rgba(232,201,122,.2);overflow:hidden;">
-    <div id="sync-fill" style="height:100%;background:#e8c97a;width:0%;transition:width .3s;"></div>
+<!-- 연동하기 고정 바 (최상단 단독) -->
+<div style="position:fixed;top:0;right:0;left:0;z-index:999;display:flex;justify-content:flex-end;align-items:center;padding:6px 16px;background:rgba(11,11,30,.85);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06);">
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:100px;">
+    <button id="sync-btn" onclick="syncAll()"
+      style="background:rgba(232,201,122,.15);border:1px solid rgba(232,201,122,.4);border-radius:7px;
+             color:#e8c97a;font-size:11px;font-weight:600;padding:5px 14px;cursor:pointer;
+             font-family:'Syne',sans-serif;letter-spacing:.06em;white-space:nowrap;transition:background .15s;"
+      onmouseover="this.style.background='rgba(232,201,122,.28)'"
+      onmouseout="this.style.background='rgba(232,201,122,.15)'">🔄 연동하기</button>
+    <div id="sync-bar" style="display:none;width:100%;height:3px;border-radius:2px;background:rgba(232,201,122,.2);overflow:hidden;">
+      <div id="sync-fill" style="height:100%;background:#e8c97a;width:0%;transition:width .3s;"></div>
+    </div>
   </div>
 </div>
+
 
 <!-- ── ADD LIVE MODAL ── -->
 <div class="modal-overlay" id="add-live-modal" onclick="closeAddLive()" style="display:none;">
@@ -504,44 +514,59 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 
 <div class="controls">
   <div class="controls-inner" id="main-filters-wrap">
-    <!-- 검색 rows -->
+
+    <!-- 검색 한 줄 -->
     <div class="filter-row-labeled">
       <span class="filter-label">검색</span>
       <div class="filter-sep"></div>
+      <button id="search-mode-btn" onclick="toggleSearchMode()"
+        style="flex-shrink:0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);
+               border-radius:8px;color:var(--muted);font-size:10px;font-weight:600;
+               padding:5px 10px;cursor:pointer;white-space:nowrap;transition:all .15s;">검색</button>
       <div class="search-row" style="flex:1;position:relative;">
         <span class="search-icon">⌕</span>
-        <input class="search-input" id="search" type="text" placeholder="제목 검색...">
+        <input class="search-input" id="search" type="text" placeholder="검색어 입력...">
       </div>
-      <div class="filter-sep"></div>
-      <div class="sort-toggle">
-        <button class="sort-btn active" id="sort-desc" onclick="setSort('desc',this)">최신순</button>
-        <button class="sort-btn" id="sort-asc" onclick="setSort('asc',this)">오래된순</button>
+      <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;">
+        <button id="tag-mode-include" class="tc-tab active" style="padding:5px 10px;font-size:10px;border-radius:0;" onclick="setTagMode('include')">포함</button>
+        <button id="tag-mode-exact" class="tc-tab" style="padding:5px 10px;font-size:10px;border-left:1px solid var(--border);border-radius:0;" onclick="setTagMode('exact')">일치</button>
       </div>
-      <div class="filter-sep"></div>
-      <div style="display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;" title="모든 필터 일치 방식">
-        <button id="tag-mode-include" class="tc-tab active" style="padding:5px 11px;font-size:10px;letter-spacing:.04em;" onclick="setTagMode('include')">포함</button>
-        <button id="tag-mode-exact" class="tc-tab" style="padding:5px 11px;font-size:10px;letter-spacing:.04em;border-left:1px solid var(--border);" onclick="setTagMode('exact')">일치</button>
-      </div>
-    </div>
-    <div class="filter-row-labeled">
-      <span class="filter-label">태그</span>
-      <div class="filter-sep"></div>
-      <div style="flex:1;display:flex;gap:8px;align-items:center;">
-        <input class="search-input" id="tag-search" type="text" placeholder="태그 검색..." style="flex:1;">
-        <div style="display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;">
-          <button class="tg-tab active-a" id="tg-filter-all" data-tg="all" onclick="setTGFilter(this)" style="padding:5px 9px;">전체</button>
-          <button class="tg-tab" id="tg-filter-a" data-tg="a" onclick="setTGFilter(this)" style="padding:5px 9px;border-left:1px solid var(--border);">A</button>
-          <button class="tg-tab" id="tg-filter-b" data-tg="b" onclick="setTGFilter(this)" style="padding:5px 9px;border-left:1px solid var(--border);">B</button>
-          <button class="tg-tab" id="tg-filter-c" data-tg="c" onclick="setTGFilter(this)" style="padding:5px 9px;border-left:1px solid var(--border);">C</button>
-        </div>
+      <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(168,85,247,.3);flex-shrink:0;">
+        <button class="sort-btn active" id="sort-desc" onclick="setSort('desc',this)"
+          style="padding:5px 10px;font-size:10px;font-weight:600;background:rgba(168,85,247,.12);color:#a855f7;border:none;cursor:pointer;border-radius:0;">최신순▼</button>
+        <button class="sort-btn" id="sort-asc" onclick="setSort('asc',this)"
+          style="padding:5px 10px;font-size:10px;font-weight:600;background:transparent;color:var(--muted);border:none;border-left:1px solid rgba(168,85,247,.3);cursor:pointer;border-radius:0;">오래된순▲</button>
       </div>
     </div>
-    <!-- 멤버 (위로 올림) -->
+
+    <!-- 방송 타입 복수선택 -->
+    <div class="filter-row-labeled" id="broadcast-type-row">
+      <button class="filter-label filter-label-btn grad-border" onclick="resetBcast()" title="방송 타입 초기화">방송</button>
+      <div class="filter-sep"></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;flex:1;">
+        <button class="btn btn-bcast active" data-bcast="live" onclick="setBcast(this)">📡 LIVE BROADCAST</button>
+        <button class="btn btn-bcast active" data-bcast="radio" onclick="setBcast(this)">📻 PL:RADIO</button>
+        <button class="btn btn-bcast active" data-bcast="lassgo" onclick="setBcast(this)">🚀 LASSGO PLAVE</button>
+      </div>
+    </div>
+
+    <!-- 태그 필터 -->
     <div class="filter-row-labeled">
-      <button class="filter-label filter-label-btn" onclick="resetMember()" title="멤버 초기화">멤버</button>
+      <button class="filter-label filter-label-btn grad-border" onclick="resetTGFilter()" title="태그 초기화">태그</button>
+      <div class="filter-sep"></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;flex:1;">
+        <button class="btn active" id="tg-filter-a" data-tg="a" onclick="setTGFilter(this)">#라방</button>
+        <button class="btn active" id="tg-filter-b" data-tg="b" onclick="setTGFilter(this)">#대사</button>
+        <button class="btn active" id="tg-filter-c" data-tg="c" onclick="setTGFilter(this)">#움찔</button>
+      </div>
+    </div>
+
+    <!-- 멤버 -->
+    <div class="filter-row-labeled">
+      <button class="filter-label filter-label-btn grad-border" onclick="resetMember()" title="멤버 초기화">멤버</button>
       <div class="filter-sep"></div>
       <div id="member-filters" style="display:flex;gap:5px;flex-wrap:wrap;flex:1;">
-        <button class="btn btn-all active" data-member="all" onclick="setMember(this)">전원</button>
+        <button class="btn btn-all" data-member="all" onclick="setMember(this)">전원</button>
         <button class="btn btn-yejun" data-member="예준" onclick="setMember(this)">💙 예준</button>
         <button class="btn btn-noah" data-member="노아" onclick="setMember(this)">💜 노아</button>
         <button class="btn btn-bambi" data-member="밤비" onclick="setMember(this)">🩷 밤비</button>
@@ -549,12 +574,12 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
         <button class="btn btn-hamin" data-member="하민" onclick="setMember(this)">🖤 하민</button>
       </div>
     </div>
-    <!-- 연도 (생일 버튼 앞에 추가) -->
+    <!-- 연도 -->
     <div class="filter-row-labeled">
-      <button class="filter-label filter-label-btn" onclick="resetYear()" title="연도 초기화">연도</button>
+      <button class="filter-label filter-label-btn grad-border" onclick="resetYear()" title="연도 초기화">연도</button>
       <div class="filter-sep"></div>
       <div id="year-filters" style="display:flex;gap:5px;flex-wrap:wrap;flex:1;">
-        <button class="btn btn-special" data-special="bday" onclick="setSpecial(this)">🎂 생일</button>
+        <button class="btn btn-special" data-special="bday" onclick="setSpecial(this);event.stopPropagation()">🎂 생일</button>
         <button class="btn" data-year="2022" onclick="setYear(this)">2022</button>
         <button class="btn" data-year="2023" onclick="setYear(this)">2023</button>
         <button class="btn" data-year="2024" onclick="setYear(this)">2024</button>
@@ -564,9 +589,9 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
     </div>
     <!-- 시즌 -->
     <div class="filter-row-labeled">
-      <button class="filter-label filter-label-btn" onclick="resetEra()" title="시즌 초기화">시즌</button>
-      <div class="filter-sep"></div>
-      <div class="era-scroll" id="era-filters" style="flex:1;">
+      <button class="filter-label filter-label-btn grad-border" onclick="resetEra()" title="시즌 초기화">시즌</button>
+      <div class="filter-sep" style="height:54px;align-self:center;"></div>
+      <div class="era-scroll" id="era-filters" style="flex:1;display:flex;flex-wrap:wrap;gap:5px;">
         <button class="btn btn-comeback" data-era="comeback" onclick="setEra(this)">✦ 컴백</button>
         <button class="btn btn-era" data-era="22연생뱅" onclick="setEra(this)">22연생뱅</button>
         <button class="btn btn-era" data-era="23연생뱅" onclick="setEra(this)">23연생뱅</button>
@@ -592,11 +617,11 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 
 <main>
   <div class="result-count" id="result-count"></div>
-  <div class="section-view active" id="view-live"><div id="live-content"><div class="empty"><div class="empty-icon">⏳</div>시트에서 불러오는 중...</div></div></div>
-  <div class="section-view" id="view-radio">
-    <div id="radio-content"><div class="empty"><div class="empty-icon">⏳</div>시트에서 불러오는 중...</div></div>
+  <div class="section-view active" id="view-broadcast">
+    <div id="live-content"><div class="empty">시트에서 불러오는 중...</div></div>
+    <div id="radio-content"></div>
+    <div id="lassgo-content"></div>
   </div>
-  <div class="section-view" id="view-lassgo"><div id="lassgo-content"><div class="empty"><div class="empty-icon">⏳</div>시트에서 불러오는 중...</div></div></div>
   <div class="section-view" id="view-songs">
     <div id="songs-filter" style="padding:10px 0 6px;">
       <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:5px;">
@@ -754,18 +779,17 @@ function cc(arr){
   return"c-mixed";
 }
 const matchM=(arr)=>{
-  if(curMemSet.has("all"))return true;
-  if(arr.includes("전원")){
-    // 전원 방송은 멤버 선택 시 제외 (정확히 선택한 멤버만 보려고 하므로)
-    return false;
-  }
-  // 항상 일치: 출연진이 선택한 멤버 집합과 정확히 같아야 함
+  if(curMemSet.has("all")||curMemSet.size===0)return true;
+  if(arr.includes("전원")) return false;
   if(arr.length!==curMemSet.size)return false;
   return arr.every(m=>curMemSet.has(m));
 };
 
 /* ── state ── */
-let curTab="live",curYear="all",curMemSet=new Set(["all"]),curQ="",curTagQ="",curTagMode="include",curEra="all",curSpecial="all",curTGFilter="all",curSort="desc";
+let curTab="broadcast",curYear="all",curMemSet=new Set(),curQ="",curTagQ="",curTagMode="include",curEra="all",curSpecial="all",curTGFilter="all",curSort="desc";
+let curTGSet=new Set(["a","b","c"]); // 태그 복수선택
+let curSearchTitleOnly=false;
+let curBcastSet=new Set(["live","radio","lassgo"]); // 방송 타입 복수선택
 
 // Birthday dates (MM.DD) and milestone title patterns
 const BDAY_DATES=new Set(["02.10","03.12","05.24","06.19","07.15","09.12","11.01"]);
@@ -1194,12 +1218,13 @@ function setTagMode(mode){
 }
 
 function setTGFilter(btn){
-  curTGFilter=btn.dataset.tg;
-  // update button active state with correct color class
-  document.querySelectorAll("#tg-filter-all,#tg-filter-a,#tg-filter-b,#tg-filter-c").forEach(b=>{
-    const g=b.dataset.tg;
-    b.className="tg-tab"+(g===curTGFilter?" active-"+(g==="all"?"a":g):"");
-  });
+  const t=btn.dataset.tg;
+  if(curTGSet.has(t)){
+    if(curTGSet.size>1){curTGSet.delete(t);btn.classList.remove("active");}
+  } else {
+    curTGSet.add(t);btn.classList.add("active");
+  }
+  curTGFilter=curTGSet.size===3?"all":[...curTGSet].join(",");
   render();
 }
 
@@ -1385,50 +1410,46 @@ async function backupAll(){
 /* ── 연동하기 (시트 동기화 + 태그 복원 + 로그) ── */
 async function syncAll(){
   const btn=document.getElementById("sync-btn");
-  if(!WEBHOOK_URL){alert("WEBHOOK_URL이 설정되지 않았어요.");return;}
   btn.textContent="🔄 연동 중...";btn.style.opacity=".5";btn.disabled=true;
   showBar("sync-bar","sync-fill"); setBar("sync-fill",5);
 
-  // 1단계: 시트에서 최신 데이터 fetch
-  try{
-    await loadFromSheets();
-  }catch(e){console.warn("시트 동기화 실패",e);}
-  setBar("sync-fill",30);
-
-  // 2단계: 태그 수집
-  const allTags=[];
-  for(let i=0;i<localStorage.length;i++){
-    const key=localStorage.key(i);
-    if(!key||!key.startsWith("plave_v2_")||key==="plave_v2_custom")continue;
-    try{
-      const d=JSON.parse(localStorage.getItem(key)||"{}");
-      const hasData=(d.tagsA&&d.tagsA.length)||(d.tagsB&&d.tagsB.length)||
-                    (d.tagsC&&d.tagsC.length)||(d.links&&d.links.length)||d.videoUrl||(d.tags&&d.tags.length);
-      if(hasData) allTags.push({sid:key.replace("plave_v2_",""),...d});
-    }catch{}
-  }
+  // 1단계: 시트에서 최신 데이터 fetch (항상 실행)
+  btn.textContent="시트 불러오는 중...";
+  try{ await loadFromSheets(); }catch(e){console.warn("시트 동기화 실패",e);}
   setBar("sync-fill",40);
 
-  // 3단계: 태그 전송
-  try{
-    const CHUNK=20,total=allTags.length;
-    for(let i=0;i<Math.max(total,1);i+=CHUNK){
-      if(total>0){
-        await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({action:"saveTags",tags:allTags.slice(i,i+CHUNK)})});
-      }
-      setBar("sync-fill",40+Math.round((Math.min(i+CHUNK,total||1)/(total||1))*45));
-      if(i+CHUNK<total) await new Promise(r=>setTimeout(r,300));
+  // 2단계: 태그/백업/로그 (WEBHOOK_URL 있을 때만)
+  if(WEBHOOK_URL){
+    btn.textContent="태그 백업 중...";
+    const allTags=[];
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(!key||!key.startsWith("plave_v2_")||key==="plave_v2_custom")continue;
+      try{
+        const d=JSON.parse(localStorage.getItem(key)||"{}");
+        const hasData=(d.tagsA&&d.tagsA.length)||(d.tagsB&&d.tagsB.length)||
+                      (d.tagsC&&d.tagsC.length)||(d.links&&d.links.length)||d.videoUrl||(d.tags&&d.tags.length);
+        if(hasData) allTags.push({sid:key.replace("plave_v2_",""),...d});
+      }catch{}
     }
-  }catch(e){console.warn("태그 전송 실패",e);}
-  setBar("sync-fill",90);
+    setBar("sync-fill",55);
+    try{
+      const CHUNK=20,total=allTags.length;
+      for(let i=0;i<Math.max(total,1);i+=CHUNK){
+        if(total>0){
+          await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({action:"saveTags",tags:allTags.slice(i,i+CHUNK)})});
+        }
+        setBar("sync-fill",55+Math.round((Math.min(i+CHUNK,total||1)/(total||1))*35));
+        if(i+CHUNK<total) await new Promise(r=>setTimeout(r,300));
+      }
+    }catch(e){console.warn("태그 전송 실패",e);}
+    await writeLog("연동하기",`시트 동기화 + 태그 ${allTags.length}개`);
+  }
 
-  // 4단계: 연동 로그
-  await writeLog("연동하기",`시트 동기화 + 태그 ${allTags.length}개 백업`);
   setBar("sync-fill",100);
-
-  btn.textContent=`✅ 연동 완료`;
-  setTimeout(()=>{btn.textContent="🔄 연동하기";btn.style.opacity="";btn.disabled=false;hideBar("sync-bar");},2500);
+  btn.textContent="✅ 완료";
+  setTimeout(()=>{btn.textContent="🔄 연동하기";btn.style.opacity="";btn.disabled=false;hideBar("sync-bar");},2000);
 }
 const SHEET_ID = "1oiCW4x77Nt9ELOlhPwPh4PyHxyy7hmhKzhoSYnCKYd8";
 const SHEETS_CONFIG = {
@@ -1833,29 +1854,14 @@ window.addEventListener("resize",updateStickyOffsets);
 
 function switchTab(t,btn){
   curTab=t;
-  resetSpecialGuest();
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
   document.querySelectorAll(".section-view").forEach(v=>v.classList.remove("active"));
-  document.getElementById("view-"+t).classList.add("active");
-  // 발매곡 탭엔 라이브 필터 숨김
+  const viewId=(t==="broadcast")?"view-broadcast":"view-songs";
+  document.getElementById(viewId).classList.add("active");
   const mf=document.getElementById("main-filters-wrap");
   if(mf) mf.style.display=(t==="songs")?"none":"";
   if(t==="songs"){renderSongs();return;}
-  btn.classList.add("active");
-  document.querySelectorAll(".section-view").forEach(v=>v.classList.remove("active"));
-  document.getElementById("view-"+t).classList.add("active");
-  // year button visibility: radio=2024/2025 only, lassgo=2024/2025 only, live=all
-  const hideForNonLive=["2022","2023","2026"];
-  hideForNonLive.forEach(y=>{
-    const el=document.querySelector(`[data-year="${y}"]`);
-    if(el)el.style.display=(t==="radio"||t==="lassgo")?"none":"";
-  });
-  if((t==="radio"||t==="lassgo")&&hideForNonLive.includes(curYear)){
-    curYear="all";
-    document.querySelectorAll("#year-filters .btn").forEach(b=>b.classList.remove("active"));
-    document.querySelector("[data-year='all']").classList.add("active");
-  }
   render();
 }
 function resetYear(){
@@ -1863,14 +1869,13 @@ function resetYear(){
   document.querySelectorAll("#year-filters .btn").forEach(b=>b.classList.remove("active"));
   document.querySelectorAll(".btn-special").forEach(b=>{
     b.classList.remove("active");
-    b.style.background="";b.style.borderColor="";b.style.color="";
+    
   });
   render();
 }
 function resetMember(){
-  curMemSet=new Set(["all"]);
+  curMemSet=new Set();
   document.querySelectorAll("#member-filters .btn").forEach(b=>b.classList.remove("active"));
-  document.querySelector("#member-filters .btn[data-member='all']").classList.add("active");
   render();
 }
 function resetEra(){
@@ -1878,29 +1883,24 @@ function resetEra(){
   document.querySelectorAll("#era-filters .btn").forEach(b=>b.classList.remove("active"));
   render();
 }
-const SPECIAL_ACTIVE_STYLE="linear-gradient(#2dd4bf,#2dd4bf) padding-box, linear-gradient(90deg,#2dd4bf,#a7f3d0,#2dd4bf) border-box";
+const SPECIAL_ACTIVE_STYLE="";
 
 function setSpecial(btn){
   if(btn.classList.contains("active")){
     btn.classList.remove("active");
-    btn.style.background="";btn.style.borderColor="";btn.style.color="";
     curSpecial="all";
+    render();
   } else {
-    document.querySelectorAll(".btn-special").forEach(b=>{
-      b.classList.remove("active");
-      b.style.background="";b.style.borderColor="";b.style.color="";
-    });
-    btn.classList.add("active");
-    btn.style.background=SPECIAL_ACTIVE_STYLE;
-    btn.style.borderColor="transparent";
-    btn.style.color="#0b0b1e";
+    document.querySelectorAll(".btn-special").forEach(b=>b.classList.remove("active"));
     curSpecial=btn.dataset.special;
     document.querySelectorAll("#year-filters .btn").forEach(b=>b.classList.remove("active"));
     curYear="all";
     document.querySelectorAll("#era-filters .btn").forEach(b=>b.classList.remove("active"));
     curEra="all";
+    render();
+    // render() 후 active 재적용
+    btn.classList.add("active");
   }
-  render();
 }
 function setYear(btn){
   if(btn.classList.contains("active")){
@@ -1911,7 +1911,7 @@ function setYear(btn){
     // clear special(생일)
     document.querySelectorAll(".btn-special").forEach(b=>{
       b.classList.remove("active");
-      b.style.background="";b.style.borderColor="";b.style.color="";
+      
     });
     curSpecial="all";
     // clear season
@@ -1932,7 +1932,7 @@ function setEra(btn){
     // clear special(생일)
     document.querySelectorAll(".btn-special").forEach(b=>{
       b.classList.remove("active");
-      b.style.background="";b.style.borderColor="";b.style.color="";
+      
     });
     curSpecial="all";
   }
@@ -1940,30 +1940,57 @@ function setEra(btn){
 }
 function setMember(btn){
   const m=btn.dataset.member;
+  const allBtn=document.querySelector("#member-filters .btn[data-member='all']");
+  const memberBtns=[...document.querySelectorAll("#member-filters .btn:not([data-member='all'])")];
+
   if(m==="all"){
-    curMemSet=new Set(["all"]);
-    document.querySelectorAll("#member-filters .btn").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-  } else {
-    curMemSet.delete("all");
-    document.querySelector("#member-filters .btn[data-member='all']").classList.remove("active");
-    if(curMemSet.has(m)){curMemSet.delete(m);btn.classList.remove("active");}
-    else{curMemSet.add(m);btn.classList.add("active");}
-    // 5명 전부 선택하면 전체로 리셋
-    if(["예준","노아","밤비","은호","하민"].every(x=>curMemSet.has(x))){
+    if(curMemSet.has("all")){
+      // 전원 활성 → 전부 미선택
+      curMemSet=new Set();
+      allBtn.classList.remove("active");
+      memberBtns.forEach(b=>b.classList.remove("active"));
+    } else {
+      // 전원 미선택 → 전부 활성
       curMemSet=new Set(["all"]);
-      document.querySelectorAll("#member-filters .btn").forEach(b=>b.classList.remove("active"));
-      document.querySelector("#member-filters .btn[data-member='all']").classList.add("active");
+      allBtn.classList.add("active");
+      memberBtns.forEach(b=>b.classList.add("active"));
     }
-    if(curMemSet.size===0){
-      curMemSet=new Set(["all"]);
-      document.querySelector("#member-filters .btn[data-member='all']").classList.add("active");
+  } else {
+    // 개별 멤버 클릭
+    const wasAll=curMemSet.has("all");
+    if(wasAll){
+      // 전원 상태에서 하나 해제 → 전원 미선택 + 해당 멤버 미선택 (4명 active)
+      curMemSet=new Set(["예준","노아","밤비","은호","하민"]);
+      curMemSet.delete(m);
+      allBtn.classList.remove("active");
+      memberBtns.forEach(b=>{
+        if(b.dataset.member===m) b.classList.remove("active");
+        else b.classList.add("active");
+      });
+    } else {
+      // 일반 토글
+      allBtn.classList.remove("active");
+      if(curMemSet.has(m)){
+        curMemSet.delete(m);
+        btn.classList.remove("active");
+      } else {
+        curMemSet.add(m);
+        btn.classList.add("active");
+      }
+      if(curMemSet.size===0){
+        allBtn.classList.remove("active");
+        memberBtns.forEach(b=>b.classList.remove("active"));
+      }
+      if(["예준","노아","밤비","은호","하민"].every(x=>curMemSet.has(x))){
+        curMemSet=new Set(["all"]);
+        allBtn.classList.add("active");
+        memberBtns.forEach(b=>b.classList.add("active"));
+      }
     }
   }
   render();
 }
 document.getElementById("search").addEventListener("input",e=>{curQ=e.target.value;render();});
-document.getElementById("tag-search").addEventListener("input",e=>{curTagQ=e.target.value.trim();render();});
 
 /* ── render live ── */
 function matchTitleOrTags(t, sid){
@@ -2169,10 +2196,45 @@ function renderRadio(){
   }).join("");
 }
 
+function resetBcast(){
+  curBcastSet=new Set(["live","radio","lassgo"]);
+  document.querySelectorAll(".btn-bcast").forEach(b=>b.classList.add("active"));
+  render();
+}
+function resetTGFilter(){
+  curTGSet=new Set(["a","b","c"]);
+  curTGFilter="all";
+  document.querySelectorAll("#tg-filter-a,#tg-filter-b,#tg-filter-c").forEach(b=>b.classList.add("active"));
+  render();
+}
+/* ── 방송 타입 복수선택 ── */
+function setBcast(btn){
+  const t=btn.dataset.bcast;
+  if(curBcastSet.has(t)&&curBcastSet.size>1){
+    curBcastSet.delete(t);btn.classList.remove("active");
+  } else {
+    curBcastSet.add(t);btn.classList.add("active");
+  }
+  render();
+}
+
+/* ── 검색 모드 토글 (검색↔제목) ── */
+function toggleSearchMode(){
+  curSearchTitleOnly=!curSearchTitleOnly;
+  const btn=document.getElementById("search-mode-btn");
+  if(curSearchTitleOnly){btn.textContent="제목";btn.classList.add("title-only");}
+  else{btn.textContent="검색";btn.classList.remove("title-only");}
+  render();
+}
+
 function render(){
-  if(curTab==="live")renderLive();
-  else if(curTab==="radio")renderRadio();
-  else renderLassgo();
+  // 방송탭: 선택된 타입만 렌더링
+  const liveEl=document.getElementById("live-content");
+  const radioEl=document.getElementById("radio-content");
+  const lassgoEl=document.getElementById("lassgo-content");
+  if(curBcastSet.has("live"))renderLive(); else if(liveEl)liveEl.innerHTML="";
+  if(curBcastSet.has("radio"))renderRadio(); else if(radioEl)radioEl.innerHTML="";
+  if(curBcastSet.has("lassgo"))renderLassgo(); else if(lassgoEl)lassgoEl.innerHTML="";
 }
 
 /* ── auto-populate video URLs from L[] into localStorage ── */
@@ -2504,7 +2566,11 @@ function refreshSongTagList(sid,tags){
 
 render();
 loadSongsFromSheet();
-syncAll();
+// 데이터 로드는 항상 실행
+loadFromSheets().then(()=>{
+  // WEBHOOK_URL 있을 때만 백업/로그
+  if(WEBHOOK_URL) syncAll();
+});
 </script>
 </body>
 </html>
