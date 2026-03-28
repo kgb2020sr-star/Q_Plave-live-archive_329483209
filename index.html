@@ -271,7 +271,7 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(7px);
-  z-index:1000;display:none;align-items:center;justify-content:center;padding:16px;}
+  z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;}
 .modal-overlay.open{display:flex;}
 .modal-box{background:#0b0b1e;border:1px solid rgba(255,255,255,.12);border-radius:16px;
   width:100%;max-width:540px;max-height:88vh;overflow-y:auto;
@@ -723,13 +723,10 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
     </div>
     <div class="modal-body">
 
-      <!-- 영상 링크 -->
-      <div id="m-main-link-area" style="margin-bottom:8px;"></div>
-
       <!-- Tags: 3-column horizontal layout -->
       <div>
         <div class="section-head">🏷️ 태그</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:end;">
 
           <!-- A -->
           <div style="display:flex;flex-direction:column;gap:5px;">
@@ -737,11 +734,9 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
               <span style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--noah);">A</span>
               <span style="font-size:10px;color:var(--muted);">라방태그</span>
             </div>
-            <div class="tags-display" id="m-tags-a" style="margin-bottom:0;min-height:24px;flex-wrap:wrap;"></div>
-            <div style="display:flex;gap:5px;">
-              <input class="m-input" id="m-tag-in-a" placeholder="입력 후 Enter" style="flex:1;font-size:11px;padding:6px 8px;"
-                onkeydown="if(event.key==='Enter'&&!event.isComposing){addTagG('a');event.preventDefault();}">
-            </div>
+            <div class="tags-display" id="m-tags-a" style="margin-bottom:0;min-height:24px;flex-wrap:wrap;flex:1;"></div>
+            <input class="m-input" id="m-tag-in-a" placeholder="입력 후 Enter" style="font-size:10px;padding:2px 7px;"
+              onkeydown="if(event.key==='Enter'&&!event.isComposing){addTagG('a');event.preventDefault();}">
           </div>
 
           <!-- B -->
@@ -750,11 +745,9 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
               <span style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--yejun);">B</span>
               <span style="font-size:10px;color:var(--muted);">대사태그</span>
             </div>
-            <div class="tags-display" id="m-tags-b" style="margin-bottom:0;min-height:24px;flex-wrap:wrap;"></div>
-            <div style="display:flex;gap:5px;">
-              <input class="m-input" id="m-tag-in-b" placeholder="입력 후 Enter" style="flex:1;font-size:11px;padding:6px 8px;"
-                onkeydown="if(event.key==='Enter'&&!event.isComposing){addTagG('b');event.preventDefault();}">
-            </div>
+            <div class="tags-display" id="m-tags-b" style="margin-bottom:0;min-height:24px;flex-wrap:wrap;flex:1;"></div>
+            <input class="m-input" id="m-tag-in-b" placeholder="입력 후 Enter" style="font-size:10px;padding:2px 7px;"
+              onkeydown="if(event.key==='Enter'&&!event.isComposing){addTagG('b');event.preventDefault();}">
           </div>
 
           <!-- C -->
@@ -763,43 +756,11 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
               <span style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--hamin);">C</span>
               <span style="font-size:10px;color:var(--muted);">움찔태그</span>
             </div>
-            <div class="tags-display" id="m-tags-c" style="margin-bottom:0;min-height:24px;flex-wrap:wrap;"></div>
-            <div style="display:flex;gap:5px;">
-              <input class="m-input" id="m-tag-in-c" placeholder="입력 후 Enter" style="flex:1;font-size:11px;padding:6px 8px;"
-                onkeydown="if(event.key==='Enter'&&!event.isComposing){addTagG('c');event.preventDefault();}">
-            </div>
+            <div class="tags-display" id="m-tags-c" style="margin-bottom:0;min-height:24px;flex-wrap:wrap;flex:1;"></div>
+            <input class="m-input" id="m-tag-in-c" placeholder="입력 후 Enter" style="font-size:10px;padding:2px 7px;"
+              onkeydown="if(event.key==='Enter'&&!event.isComposing){addTagG('c');event.preventDefault();}">
           </div>
 
-        </div>
-      </div>
-
-      <!-- Timecode links -->
-      <div>
-        <div class="section-head">⏱️ 타임코드 / 링크</div>
-        <div class="tc-list" id="m-tc-list"></div>
-        <div class="tc-tabs">
-          <button class="tc-tab active" id="tc-tab-d" onclick="setTCTab('d')">직접 링크</button>
-          <button class="tc-tab" id="tc-tab-yt" onclick="setTCTab('yt')">YouTube 타임코드</button>
-        </div>
-        <!-- Direct link pane: label required + URL -->
-        <div class="tc-pane" id="tc-pane-d">
-          <div class="m-row">
-            <input class="m-input" id="tc-d-label" placeholder="라벨 (필수)" style="flex:0 0 130px;">
-            <input class="m-input" id="tc-d-url" placeholder="https://..."
-              onkeydown="if(event.key==='Enter'){addLink('d');event.preventDefault();}">
-            <button class="m-btn" onclick="addLink('d')" style="flex-shrink:0;">추가</button>
-          </div>
-        </div>
-        <!-- YouTube timecode pane: label required + time only, auto-uses main video URL -->
-        <div class="tc-pane" id="tc-pane-yt" style="display:none">
-          <div class="m-row">
-            <input class="m-input" id="tc-yt-label" placeholder="라벨 (필수)" style="flex:0 0 130px;">
-            <input class="m-input" id="tc-yt-time" placeholder="시간 (예: 023456 = 02:34:56)"
-              oninput="onYTTimeInput(this)"
-              onkeydown="if(event.key==='Enter'){addLink('yt');event.preventDefault();}">
-            <button class="m-btn" onclick="addLink('yt')" style="flex-shrink:0;">⏎ 추가</button>
-          </div>
-          <div class="tc-preview-box" id="tc-yt-preview" style="display:none"></div>
         </div>
       </div>
 
@@ -983,8 +944,7 @@ function openEdit(id,title,dateStr,type){
   } else {
     thumbWrap.style.display="none";
   }
-  renderAllTags();renderMainLink();renderLinks();
-  setTCTab("d");
+  renderAllTags();
   document.getElementById("edit-modal").classList.add("open");
 }
 function closeModal(){
