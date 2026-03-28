@@ -1591,8 +1591,9 @@ function getLiveIdx(sid){
   const m2=sid.match(/^live_(\d{4})(\d{2})(\d{2})_(\d+)$/);
   if(m2){
     const [,y,mo,dd,n]=[...m2];
-    const d=`${mo}.${dd}`;
-    const sameDay=L.filter(b=>b.y===+y&&b.d===d);
+    const dPad=`${mo}.${dd}`;           // "03.26"
+    const dNoPad=`${+mo}.${+dd}`;       // "3.26"
+    const sameDay=L.filter(b=>b.y===+y&&(b.d===dPad||b.d===dNoPad));
     const entry=sameDay[+n];
     return entry?L.indexOf(entry):-1;
   }
