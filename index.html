@@ -61,7 +61,9 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
 #filters-collapsible{transition:max-height .18s cubic-bezier(0.4,0,0.2,1),opacity .15s ease;overflow:hidden;max-height:300px;opacity:1;position:relative;}
 #filters-collapsible.collapsed{max-height:0!important;opacity:0;}
 #filters-collapsible::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to bottom,transparent,var(--bg));opacity:0;pointer-events:none;transition:opacity .1s ease;z-index:1;}
+#filters-collapsible::before{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(to top,transparent,var(--bg));opacity:0;pointer-events:none;transition:opacity .1s ease;z-index:1;}
 #filters-collapsible.collapsing::after{opacity:1;}
+#filters-collapsible.expanding::before{opacity:1;}
 .controls-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
 .search-row{position:relative;}
 .search-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
@@ -1753,8 +1755,10 @@ function toggleFilters(forceClose){
     arrow.textContent="▼";
     filtersOpen=false;
   } else {
+    el.classList.add("expanding");
     el.classList.remove("collapsed");
     el.classList.remove("collapsing");
+    setTimeout(()=>el.classList.remove("expanding"),180);
     arrow.textContent="▲";
     filtersOpen=true;
   }
