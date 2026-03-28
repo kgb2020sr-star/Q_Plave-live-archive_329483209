@@ -792,40 +792,23 @@ let curBcastAllActive=false; // 방송 라벨 토글 상태
 // Birthday dates (MM.DD) and milestone title patterns
 const BDAY_DATES=new Set(["02.10","03.12","05.24","06.19","07.15","09.12","11.01"]);
 const MILESTONE_RE=/100일|1000일|100회|200회|300회|회 특집/;
+// gviz CSV는 "11.10" → "11.1" (trailing zero 제거)로 내보냄
+// 일(day)이 1자리면 오른쪽에 0 붙여서 복원: "11.1" → "11.10"
 function normD(d){
   if(!d) return d;
   const p=d.split(".");
   if(p.length!==2) return d;
   const mo=p[0].padStart(2,"0");
-  // gviz가 "11.10" → "11.1"로 trailing zero 제거할 수 있음
-  // 1자리 일 부분이 오면 10/20/30일 가능성 → 오른쪽에 0 붙여서 복원
-  // 단, BDAY_DATES에 없는 날짜는 생일 필터에 걸리지 않으므로
-  // 양쪽 해석(왼쪽 패딩 & 오른쪽 패딩) 모두 저장
-  const day=p[1];
-  return mo+"."+day.padStart(2,"0");
+  const day=p[1].length===1 ? p[1]+"0" : p[1].padStart(2,"0");
+  return mo+"."+day;
 }
-function normDRight(d){
-  if(!d) return d;
-  const p=d.split(".");
-  if(p.length!==2) return d;
-  return p[0].padStart(2,"0")+"."+p[1].padEnd(2,"0");
+function isSpecialBday(d,t){
+  return BDAY_DATES.has(normD(d))||(t&&t.includes("생일"));
 }
-function nextDay(d){
-  const p=normD(d).split(".");
-  const dt=new Date(2000,+p[0]-1,+p[1]+1);
-  return String(dt.getMonth()+1).padStart(2,"0")+"."+String(dt.getDate()).padStart(2,"0");
-}
-function isSpecialBday(d){
-  const ndL=normD(d);    // "11.1" → "11.01" (11월 1일 해석)
-  const ndR=normDRight(d); // "11.1" → "11.10" (11월 10일 해석)
-  // 전날 라방 포함
-  return BDAY_DATES.has(ndL)||BDAY_DATES.has(nextDay(ndL))||
-         (ndL!==ndR&&(BDAY_DATES.has(ndR)||BDAY_DATES.has(nextDay(ndR))));
-}
-function isSpecialMilestone(d,t){return !isSpecialBday(d)&&MILESTONE_RE.test(t);}
+function isSpecialMilestone(d,t){return !isSpecialBday(d,t)&&MILESTONE_RE.test(t);}
 function matchSpecial(d,t){
   if(curSpecial==="all")return true;
-  if(curSpecial==="bday")return isSpecialBday(d);
+  if(curSpecial==="bday")return isSpecialBday(d,t);
   if(curSpecial==="milestone")return isSpecialMilestone(d,t);
   return true;
 }
@@ -1608,7 +1591,8 @@ const R=[];
 /* helpers for built-in URL/thumb */
 /* ── SID 생성 (날짜 기반, 같은 날 N번째) ── */
 function makeSid(type, y, d, t){
-  const dateKey=`${y}${d.replace(".","")}`; // YYYYMMDD
+  const nd=normD(d||"");
+  const dateKey=`${y}${nd.replace(".","")}`; // YYYYMMDD
   if(type==="live"){
     // 같은 날 방송이 여러 개면 L[]에서 몇 번째인지 계산
     const sameDay=L.filter(b=>b.y===y&&b.d===d);
@@ -1680,7 +1664,7 @@ function updateAlPreview(){
         if(era&&num>=era.from&&num<=era.to){tags.push(`🎵 ${eraNames[i]}`);break;}
       }
       // special
-      if(isSpecialBday(d)) tags.push("🎂 생일");
+      if(isSpecialBday(d,t)) tags.push("🎂 생일");
     }
   }
   if(titleVal&&!tags.includes("🎂 생일")&&MILESTONE_RE.test(titleVal)) tags.push("✦ N일뱅");
@@ -2055,17 +2039,17 @@ function renderLive(){
           :`<div class="card-thumb-empty">📺</div>`;
         const isDebut=SEASON_DATES.has(toNum(b.y,b.d));
         const eraLabel=isDebut?SEASON_LABEL[toNum(b.y,b.d)]:"";
-        const isBday=isSpecialBday(b.d);
+        const isBday=isSpecialBday(b.d,b.t);
         const isMilestone=isSpecialMilestone(b.d,b.t);
         const specialCls=isBday?"special-bday":isMilestone?"special-milestone":"";
-        return`<div class="card ${cc(b.m)}${isDebut?' season-debut':''}${specialCls?' '+specialCls:''}" data-sid="${escH(sid)}" data-title="${escH(b.t)}" data-date="${yy}.${b.d}" data-type="live" onclick="if(!event.target.closest('a,button'))handleCardClick(this)">
+        return`<div class="card ${cc(b.m)}${isDebut?' season-debut':''}${specialCls?' '+specialCls:''}" data-sid="${escH(sid)}" data-title="${escH(b.t)}" data-date="${yy}.${normD(b.d)}" data-type="live" onclick="if(!event.target.closest('a,button'))handleCardClick(this)">
           ${isDebut?`<div style="font-size:10px;font-weight:700;color:#e8c97a;letter-spacing:.08em;margin-bottom:5px;">✦ ${escH(eraLabel)}</div>`:''}
           ${isBday&&!isDebut?`<div style="font-size:10px;font-weight:700;color:#2dd4bf;letter-spacing:.08em;margin-bottom:5px;">🎂 생일</div>`:''}
           ${isMilestone&&!isDebut&&!isBday?`<div style="font-size:10px;font-weight:700;color:#2dd4bf;letter-spacing:.08em;margin-bottom:5px;">✦ 기념</div>`:''}
           <div class="card-with-thumb">
             ${thumbHtml}
             <div class="card-body-wrap">
-              <div class="card-top"><span class="card-date">${yy}.${b.d}</span><div class="card-badges">${badges}</div></div>
+              <div class="card-top"><span class="card-date">${yy}.${normD(b.d)}</span><div class="card-badges">${badges}</div></div>
               <div class="card-title">${b.t}</div>
             </div>
           </div>
@@ -2173,7 +2157,7 @@ function renderRadio(){
             ${rThumbHtml}
             <div class="card-body-wrap">
               <div class="card-top">
-                <span class="card-date">${yy}.${r.d}</span>
+                <span class="card-date">${yy}.${normD(r.d)}</span>
                 <div class="card-badges"><span class="badge badge-type-radio">📻 라디오</span>${vurl?'<span class="badge" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);">🔗</span>':''}</div>
               </div>
               <div class="card-ep">Ep.${ep}</div>
@@ -2274,7 +2258,7 @@ function renderUnifiedCard(item,yy){
       ${thumbHtml}
       <div class="card-body-wrap">
         <div class="card-top">
-          <span class="card-date">${yy}.${item.d}</span>
+          <span class="card-date">${yy}.${normD(item.d)}</span>
           <div class="card-badges">${badge}${vurl?'<span class="badge" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);">🔗</span>':''}</div>
         </div>
         <div class="card-title">${escH(title)}</div>
@@ -2400,7 +2384,7 @@ function renderLassgo(){
             ${pThumbHtml}
             <div class="card-body-wrap">
               <div class="card-top">
-                <span class="card-date">${p.y}.${p.d}</span>
+                <span class="card-date">${p.y}.${normD(p.d)}</span>
                 <div class="card-badges"><span class="badge badge-type-lassgo">🚀 라쓰고</span>${pvurl?'<span class="badge" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:var(--muted);">🔗</span>':''}</div>
               </div>
               <div class="card-ep" style="color:rgba(255,183,77,.8);">Ep.${p.ep}</div>
