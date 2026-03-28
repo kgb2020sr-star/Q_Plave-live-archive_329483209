@@ -402,23 +402,29 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
       <button class="tab-btn" onclick="switchTab('songs',this)">🎵 발매곡</button>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <button class="btn-add-live" id="sheets-refresh-btn" onclick="refreshFromSheets()" title="구글 시트에서 최신 데이터 불러오기">↻ 시트 동기화</button>
-      <!-- 태그 백업 -->
+      <!-- 백업하기 (태그 + 수기 추가 통합) -->
       <div style="position:relative;display:inline-flex;flex-direction:column;gap:2px;">
-        <button class="btn-add-live" id="tag-backup-btn" onclick="backupTagsToSheets()" title="태그를 구글 시트에 백업">🏷️ 태그 백업</button>
+        <button class="btn-add-live" id="tag-backup-btn" onclick="backupAll()" title="태그 및 수기 추가 방송 백업">💾 백업하기</button>
         <div id="tag-backup-bar" style="display:none;height:3px;border-radius:2px;background:rgba(45,212,191,.2);overflow:hidden;">
           <div id="tag-backup-fill" style="height:100%;background:#2dd4bf;width:0%;transition:width .3s;"></div>
         </div>
       </div>
-      <!-- 연동하기 -->
-      <div style="position:relative;display:inline-flex;flex-direction:column;gap:2px;">
-        <button class="btn-add-live" id="sync-btn" onclick="syncAll()" title="태그+로그 일괄 연동" style="background:rgba(232,201,122,.12);border-color:rgba(232,201,122,.35);color:#e8c97a;">🔄 연동하기</button>
-        <div id="sync-bar" style="display:none;height:3px;border-radius:2px;background:rgba(232,201,122,.2);overflow:hidden;">
-          <div id="sync-fill" style="height:100%;background:#e8c97a;width:0%;transition:width .3s;"></div>
-        </div>
-      </div>
-      <button class="btn-add-live" onclick="openAddLive()">＋ 새 방송 추가</button>
+      <button class="btn-add-live" onclick="openAddLive()" title="새 방송 추가" style="padding:5px 10px;font-size:16px;">＋</button>
     </div>
+  </div>
+</div>
+
+<!-- 연동하기 고정 버튼 (우측 상단) -->
+<div id="sync-fixed-wrap" style="position:fixed;top:14px;right:18px;z-index:900;display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+  <button id="sync-btn" onclick="syncAll()"
+    style="background:rgba(232,201,122,.15);border:1px solid rgba(232,201,122,.4);border-radius:8px;
+           color:#e8c97a;font-size:11px;font-weight:600;padding:6px 14px;cursor:pointer;
+           font-family:'Syne',sans-serif;letter-spacing:.06em;white-space:nowrap;
+           transition:background .15s;"
+    onmouseover="this.style.background='rgba(232,201,122,.28)'"
+    onmouseout="this.style.background='rgba(232,201,122,.15)'">🔄 연동하기</button>
+  <div id="sync-bar" style="display:none;width:100%;height:3px;border-radius:2px;background:rgba(232,201,122,.2);overflow:hidden;">
+    <div id="sync-fill" style="height:100%;background:#e8c97a;width:0%;transition:width .3s;"></div>
   </div>
 </div>
 
@@ -1315,18 +1321,19 @@ async function backupTagsToSheets(){
   }
 }
 
-/* ── 연동하기 (태그 백업 + 로그) ── */
-async function syncAll(){
-  const btn=document.getElementById("sync-btn");
+/* ── 백업하기 (태그 + 수기 추가 통합) ── */
+async function backupAll(){
+  const btn=document.getElementById("tag-backup-btn");
   if(!WEBHOOK_URL){alert("WEBHOOK_URL이 설정되지 않았어요.");return;}
-  btn.textContent="🔄 연동 중...";btn.style.opacity=".5";btn.disabled=true;
-  showBar("sync-bar","sync-fill"); setBar("sync-fill",10);
+  btn.textContent="💾 수집 중...";btn.style.opacity=".5";btn.disabled=true;
+  showBar("tag-backup-bar","tag-backup-fill");
+  setBar("tag-backup-fill",10);
 
-  // 1단계: 태그 수집
+  // 태그 수집
   const allTags=[];
   for(let i=0;i<localStorage.length;i++){
     const key=localStorage.key(i);
-    if(!key||!key.startsWith("plave_v2_"))continue;
+    if(!key||!key.startsWith("plave_v2_")||key==="plave_v2_custom")continue;
     try{
       const d=JSON.parse(localStorage.getItem(key)||"{}");
       const hasData=(d.tagsA&&d.tagsA.length)||(d.tagsB&&d.tagsB.length)||
@@ -1334,9 +1341,75 @@ async function syncAll(){
       if(hasData) allTags.push({sid:key.replace("plave_v2_",""),...d});
     }catch{}
   }
+  setBar("tag-backup-fill",25);
+
+  // 수기 추가 방송 수집
+  let customs=[];
+  try{customs=JSON.parse(localStorage.getItem("plave_v2_custom")||"[]");}catch{}
+  setBar("tag-backup-fill",35);
+
+  try{
+    // 태그 전송 (20개씩)
+    const CHUNK=20,total=allTags.length;
+    for(let i=0;i<Math.max(total,1);i+=CHUNK){
+      if(total>0){
+        await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({action:"saveTags",tags:allTags.slice(i,i+CHUNK)})});
+      }
+      setBar("tag-backup-fill",35+Math.round((Math.min(i+CHUNK,total||1)/(total||1))*40));
+      if(i+CHUNK<total) await new Promise(r=>setTimeout(r,300));
+    }
+    setBar("tag-backup-fill",78);
+
+    // 수기 추가 전송
+    if(customs.length){
+      await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"saveCustom",
+          live:customs.filter(c=>!c.type||c.type==="live"),
+          radio:customs.filter(c=>c.type==="radio"),
+          lassgo:customs.filter(c=>c.type==="lassgo")
+        })});
+    }
+    setBar("tag-backup-fill",100);
+    writeLog("백업하기",`태그 ${allTags.length}개, 수기추가 ${customs.length}개`);
+    btn.textContent=`✅ 완료 (태그 ${allTags.length}개${customs.length?` + 수기 ${customs.length}개`:""})`;
+    setTimeout(()=>{btn.textContent="💾 백업하기";btn.style.opacity="";btn.disabled=false;hideBar("tag-backup-bar");},2500);
+  }catch(e){
+    document.getElementById("tag-backup-fill").style.background="#ff5252";
+    setBar("tag-backup-fill",100);btn.textContent="❌ 실패";
+    setTimeout(()=>{btn.textContent="💾 백업하기";btn.style.opacity="";btn.disabled=false;hideBar("tag-backup-bar");
+      document.getElementById("tag-backup-fill").style.background="#2dd4bf";},2000);
+  }
+}
+
+/* ── 연동하기 (시트 동기화 + 태그 복원 + 로그) ── */
+async function syncAll(){
+  const btn=document.getElementById("sync-btn");
+  if(!WEBHOOK_URL){alert("WEBHOOK_URL이 설정되지 않았어요.");return;}
+  btn.textContent="🔄 연동 중...";btn.style.opacity=".5";btn.disabled=true;
+  showBar("sync-bar","sync-fill"); setBar("sync-fill",5);
+
+  // 1단계: 시트에서 최신 데이터 fetch
+  try{
+    await loadFromSheets();
+  }catch(e){console.warn("시트 동기화 실패",e);}
   setBar("sync-fill",30);
 
-  // 2단계: 태그 전송 (20개씩)
+  // 2단계: 태그 수집
+  const allTags=[];
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(!key||!key.startsWith("plave_v2_")||key==="plave_v2_custom")continue;
+    try{
+      const d=JSON.parse(localStorage.getItem(key)||"{}");
+      const hasData=(d.tagsA&&d.tagsA.length)||(d.tagsB&&d.tagsB.length)||
+                    (d.tagsC&&d.tagsC.length)||(d.links&&d.links.length)||d.videoUrl||(d.tags&&d.tags.length);
+      if(hasData) allTags.push({sid:key.replace("plave_v2_",""),...d});
+    }catch{}
+  }
+  setBar("sync-fill",40);
+
+  // 3단계: 태그 전송
   try{
     const CHUNK=20,total=allTags.length;
     for(let i=0;i<Math.max(total,1);i+=CHUNK){
@@ -1344,17 +1417,17 @@ async function syncAll(){
         await fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
           body:JSON.stringify({action:"saveTags",tags:allTags.slice(i,i+CHUNK)})});
       }
-      setBar("sync-fill",30+Math.round((Math.min(i+CHUNK,total||1)/(total||1))*50));
+      setBar("sync-fill",40+Math.round((Math.min(i+CHUNK,total||1)/(total||1))*45));
       if(i+CHUNK<total) await new Promise(r=>setTimeout(r,300));
     }
   }catch(e){console.warn("태그 전송 실패",e);}
-  setBar("sync-fill",85);
+  setBar("sync-fill",90);
 
-  // 3단계: 연동 로그 기록
-  await writeLog("연동하기", `태그 ${allTags.length}개 백업`);
+  // 4단계: 연동 로그
+  await writeLog("연동하기",`시트 동기화 + 태그 ${allTags.length}개 백업`);
   setBar("sync-fill",100);
 
-  btn.textContent=`✅ 연동 완료 (태그 ${allTags.length}개)`;
+  btn.textContent=`✅ 연동 완료`;
   setTimeout(()=>{btn.textContent="🔄 연동하기";btn.style.opacity="";btn.disabled=false;hideBar("sync-bar");},2500);
 }
 const SHEET_ID = "1oiCW4x77Nt9ELOlhPwPh4PyHxyy7hmhKzhoSYnCKYd8";
