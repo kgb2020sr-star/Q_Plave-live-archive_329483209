@@ -13,7 +13,7 @@
   --border:rgba(255,255,255,0.07);--text:#e8e8f0;--muted:#8888aa;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-top:44px;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-top:0;}
 body::before{content:'';position:fixed;inset:0;
   background-image:
     radial-gradient(1px 1px at 15% 20%,rgba(255,255,255,.4) 0%,transparent 100%),
@@ -792,12 +792,30 @@ let curBcastAllActive=false; // 방송 라벨 토글 상태
 // Birthday dates (MM.DD) and milestone title patterns
 const BDAY_DATES=new Set(["02.10","03.12","05.24","06.19","07.15","09.12","11.01"]);
 const MILESTONE_RE=/100일|1000일|100회|200회|300회|회 특집/;
-function normD(d){if(!d)return d;const p=d.split(".");return p.length===2?p[0].padStart(2,"0")+"."+p[1].padStart(2,"0"):d;}
-function nextDay(d){const [m,dd]=d.split(".").map(Number);const dt=new Date(2000,m-1,dd+1);return String(dt.getMonth()+1).padStart(2,"0")+"."+String(dt.getDate()).padStart(2,"0");}
+function normD(d){
+  if(!d) return d;
+  const p=d.split(".");
+  if(p.length!==2) return d;
+  const mo=p[0].padStart(2,"0");
+  // gviz가 "11.10" → "11.1"로 trailing zero 제거할 수 있음
+  // 1자리 일 부분이 오면 10/20/30일 가능성 → 오른쪽에 0 붙여서 복원
+  // 단, BDAY_DATES에 없는 날짜는 생일 필터에 걸리지 않으므로
+  // 양쪽 해석(왼쪽 패딩 & 오른쪽 패딩) 모두 저장
+  const day=p[1];
+  return mo+"."+day.padStart(2,"0");
+}
+function normDRight(d){
+  if(!d) return d;
+  const p=d.split(".");
+  if(p.length!==2) return d;
+  return p[0].padStart(2,"0")+"."+p[1].padEnd(2,"0");
+}
 function isSpecialBday(d){
-  const nd=normD(d);
-  // 당일이 생일이거나, 당일의 다음날이 생일 (= 전날 라방)
-  return BDAY_DATES.has(nd)||BDAY_DATES.has(nextDay(nd));
+  const ndL=normD(d);    // "11.1" → "11.01" (11월 1일 해석)
+  const ndR=normDRight(d); // "11.1" → "11.10" (11월 10일 해석)
+  // 전날 라방 포함
+  return BDAY_DATES.has(ndL)||BDAY_DATES.has(nextDay(ndL))||
+         (ndL!==ndR&&(BDAY_DATES.has(ndR)||BDAY_DATES.has(nextDay(ndR))));
 }
 function isSpecialMilestone(d,t){return !isSpecialBday(d)&&MILESTONE_RE.test(t);}
 function matchSpecial(d,t){
@@ -1455,6 +1473,8 @@ async function loadFromSheets(onStatus){
   const st=onStatus||((t)=>{});
   const cfg = SHEETS_CONFIG;
   let loaded = false;
+  // 중복 방지: 시트 로드 전 기존 데이터 초기화
+  L.length=0; R.length=0; P.length=0;
   try {
     if(cfg.live){
       st("라이브 불러오는 중");
@@ -1474,7 +1494,7 @@ async function loadFromSheets(onStatus){
             } else {
               // 시트에만 있는 신규 방송 추가
               const members=m?m.split(/[,，]/).map(s=>s.trim()).filter(Boolean):["전원"];
-              const entry={y:+y,d,t:t||"",m:members,url:url||"",thumb:thumb||""};
+              const entry={y:+y,d:normD(d),t:t||"",m:members,url:url||"",thumb:thumb||""};
               if(url&&!thumb){
                 const vid=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/))([a-zA-Z0-9_-]{11})/);
                 if(vid) entry.thumb=`https://i.ytimg.com/vi/${vid[1]}/mqdefault.jpg`;
