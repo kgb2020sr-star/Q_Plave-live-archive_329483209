@@ -33,14 +33,14 @@ body::before{content:'';position:fixed;inset:0;
     radial-gradient(1px 1px at 5% 50%,rgba(255,255,255,.15) 0%,transparent 100%);
   pointer-events:none;z-index:0;}
 
-header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);text-align:center;padding:18px 20px 14px;border-bottom:1px solid var(--border);}
+header{position:sticky;top:0;z-index:101;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);text-align:center;padding:18px 20px 14px;border-bottom:1px solid var(--border);}
 
 .logo-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(22px,4.5vw,42px);letter-spacing:.12em;
   background:linear-gradient(90deg,var(--yejun) 0%,var(--yejun) 12%,var(--noah) 28%,var(--bambi) 50%,var(--eunho) 72%,var(--hamin) 88%,var(--hamin) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .logo-sub{font-size:11px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:5px;}
 
-.tab-bar{position:sticky;top:44px;z-index:100;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.tab-bar{position:sticky;top:0;z-index:100;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
 .tab-row{max-width:1200px;margin:0 auto;display:flex;padding:0 16px;align-items:center;justify-content:space-between;}
 .btn-add-live{background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.3);border-radius:7px;
   color:var(--noah);font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:500;
@@ -53,7 +53,7 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
 .tab-btn:hover{color:var(--text);}
 .tab-btn.active{color:var(--text);border-bottom-color:var(--noah);}
 
-.controls{position:sticky;top:44px;z-index:99;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 20px;isolation:isolate;}
+.controls{position:sticky;top:0;z-index:99;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 20px;isolation:isolate;}
 #filters-collapsible{transition:max-height .18s cubic-bezier(0.4,0,0.2,1),opacity .15s ease;overflow:hidden;max-height:300px;opacity:1;position:relative;}
 #filters-collapsible.collapsed{max-height:0!important;opacity:0;}
 #filters-collapsible::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to bottom,transparent,var(--bg));opacity:0;pointer-events:none;transition:opacity .1s ease;z-index:1;}
@@ -1473,8 +1473,10 @@ async function loadFromSheets(onStatus){
   const st=onStatus||((t)=>{});
   const cfg = SHEETS_CONFIG;
   let loaded = false;
-  // 중복 방지: 시트 로드 전 기존 데이터 초기화
+  // 중복 방지: 시트 데이터 초기화 (custom 수기 방송은 보존)
+  const customBackup=L.filter(b=>b._custom);
   L.length=0; R.length=0; P.length=0;
+  customBackup.forEach(b=>L.push(b));
   try {
     if(cfg.live){
       st("라이브 불러오는 중");
@@ -1726,7 +1728,7 @@ function submitAddLive(){
   // members
   const selMems=[...document.querySelectorAll("#al-members .btn.active")].map(b=>b.dataset.m);
   const m=selMems.length?selMems:["전원"];
-  const entry={y,d,t:title,m,url:url||""};
+  const entry={y,d,t:title,m,url:url||"",_custom:true};
   // extract thumb from URL if youtube
   if(url){
     const vid=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/))([a-zA-Z0-9_-]{11})/);
@@ -1765,7 +1767,7 @@ function submitAddLive(){
     customs.forEach(e=>{
       // avoid duplicates (same y+d+t)
       if(!L.some(l=>l.y===e.y&&l.d===e.d&&l.t===e.t)){
-        L.push(e);
+        L.push({...e,_custom:true});
       }
     });
   }catch{}
