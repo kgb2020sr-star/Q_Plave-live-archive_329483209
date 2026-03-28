@@ -1861,6 +1861,11 @@ window.addEventListener("scroll",()=>{
   const sy=window.scrollY;
   if(sy>lastScrollY&&sy>10&&filtersOpen) toggleFilters(true);
   if(sy<=0&&!filtersOpen) toggleFilters(false);
+  // 발매곡 탭 스크롤 토글
+  if(curTab==="songs"){
+    if(sy>lastScrollY&&sy>10&&songFiltersOpen) toggleSongFilters();
+    if(sy<=0&&!songFiltersOpen) toggleSongFilters();
+  }
   lastScrollY=sy;
 },{passive:true});
 
