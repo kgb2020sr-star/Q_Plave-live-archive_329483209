@@ -1769,6 +1769,14 @@ document.addEventListener("DOMContentLoaded",()=>{
   // 초기 펼친 상태
   const el=document.getElementById("filters-collapsible");
   if(el) el.classList.remove("collapsed");
+
+  // 카드 클릭 이벤트 위임 (data-* 속성 기반 — 제목에 따옴표 있어도 안전)
+  document.addEventListener("click", e=>{
+    const card=e.target.closest(".card[data-sid]");
+    if(!card) return;
+    if(e.target.closest("a, button")) return;
+    openEdit(card.dataset.sid, card.dataset.title, card.dataset.date, card.dataset.type);
+  });
 });
 let lastScrollY=0;
 let scrollTimer=null;
@@ -2006,7 +2014,7 @@ function renderLive(){
         const isBday=isSpecialBday(b.d);
         const isMilestone=isSpecialMilestone(b.d,b.t);
         const specialCls=isBday?"special-bday":isMilestone?"special-milestone":"";
-        return`<div class="card ${cc(b.m)}${isDebut?' season-debut':''}${specialCls?' '+specialCls:''}" onclick="openEdit('${sid}','${escH(b.t)}','${yy}.${b.d}','live')">
+        return`<div class="card ${cc(b.m)}${isDebut?' season-debut':''}${specialCls?' '+specialCls:''}" data-sid="${escH(sid)}" data-title="${escH(b.t)}" data-date="${yy}.${b.d}" data-type="live">`
           ${isDebut?`<div style="font-size:10px;font-weight:700;color:#e8c97a;letter-spacing:.08em;margin-bottom:5px;">✦ ${escH(eraLabel)}</div>`:''}
           ${isBday&&!isDebut?`<div style="font-size:10px;font-weight:700;color:#2dd4bf;letter-spacing:.08em;margin-bottom:5px;">🎂 생일</div>`:''}
           ${isMilestone&&!isDebut&&!isBday?`<div style="font-size:10px;font-weight:700;color:#2dd4bf;letter-spacing:.08em;margin-bottom:5px;">✦ 기념</div>`:''}
@@ -2116,7 +2124,7 @@ function renderRadio(){
         const rThumbHtml=rthumb
           ?`<a class="card-thumb-link" href="${escH(vurl||'#')}" target="_blank" onclick="event.stopPropagation()"><img src="${escH(rthumb)}" onerror="window.thumbErr&&window.thumbErr(this)" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></a>`
           :`<div class="card-thumb-empty">📻</div>`;
-        return`<div class="card ${cc(r.dj)}" onclick="openEdit('${sid}','${escH(cardTitle)}','${yy}.${r.d}','radio')">
+        return`<div class="card ${cc(r.dj)}" data-sid="${escH(sid)}" data-title="${escH(cardTitle)}" data-date="${yy}.${r.d}" data-type="radio">`
           <div class="card-with-thumb">
             ${rThumbHtml}
             <div class="card-body-wrap">
@@ -2205,7 +2213,7 @@ function renderUnifiedCard(item,yy){
     memberPills="";
   }
   const colorClass=type==="live"?cc(item.m||[]):type==="radio"?cc(item.dj||[]):"c-all";
-  return`<div class="card ${colorClass}" onclick="openEdit('${sid}','${escH(title)}','${yy}.${item.d}','${type}')">
+  return`<div class="card ${colorClass}" data-sid="${escH(sid)}" data-title="${escH(title)}" data-date="${yy}.${item.d}" data-type="${type}">`
     <div class="card-with-thumb">
       ${thumbHtml}
       <div class="card-body-wrap">
@@ -2332,7 +2340,7 @@ function renderLassgo(){
         const pThumbHtml=pthumb
           ?`<a class="card-thumb-link" href="${escH(pvurl||'#')}" target="_blank" onclick="event.stopPropagation()"><img src="${escH(pthumb)}" onerror="window.thumbErr&&window.thumbErr(this)" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></a>`
           :`<div class="card-thumb-empty">🚀</div>`;
-        return`<div class="card c-all" onclick="openEdit('${sid}','${escH(p.t)}','${p.y}.${p.d}','lassgo')">
+        return`<div class="card c-all" data-sid="${escH(sid)}" data-title="${escH(p.t)}" data-date="${p.y}.${p.d}" data-type="lassgo">`
           <div class="card-with-thumb">
             ${pThumbHtml}
             <div class="card-body-wrap">
