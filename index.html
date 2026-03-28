@@ -790,6 +790,7 @@ let curTab="broadcast",curYear="all",curMemSet=new Set(),curQ="",curTagQ="",curT
 let curTGSet=new Set(["a","b","c"]); // 태그 복수선택
 let curSearchTitleOnly=false;
 let curBcastSet=new Set(["live"]); // 방송 타입 기본: 라이브만
+let curBcastAllActive=false; // 방송 라벨 토글 상태
 
 // Birthday dates (MM.DD) and milestone title patterns
 const BDAY_DATES=new Set(["02.10","03.12","05.24","06.19","07.15","09.12","11.01"]);
@@ -1259,11 +1260,18 @@ function setTagMode(mode){
 function setTGFilter(btn){
   const t=btn.dataset.tg;
   if(curTGSet.has(t)){
-    if(curTGSet.size>1){curTGSet.delete(t);btn.classList.remove("active");}
+    if(curTGSet.size===1){
+      // 마지막 하나 → 3개 전부로 복귀
+      curTGSet=new Set(["a","b","c"]);curTGFilter="all";
+      document.querySelectorAll("#tg-filter-a,#tg-filter-b,#tg-filter-c").forEach(b=>b.classList.add("active"));
+    } else {
+      curTGSet.delete(t);btn.classList.remove("active");
+      curTGFilter=curTGSet.size===3?"all":[...curTGSet].join(",");
+    }
   } else {
     curTGSet.add(t);btn.classList.add("active");
+    curTGFilter=curTGSet.size===3?"all":[...curTGSet].join(",");
   }
-  curTGFilter=curTGSet.size===3?"all":[...curTGSet].join(",");
   render();
 }
 
@@ -1856,18 +1864,15 @@ function setSpecial(btn){
   if(btn.classList.contains("active")){
     btn.classList.remove("active");
     curSpecial="all";
-    render();
   } else {
     document.querySelectorAll(".btn-special").forEach(b=>b.classList.remove("active"));
     curSpecial=btn.dataset.special;
-    document.querySelectorAll("#year-filters .btn").forEach(b=>b.classList.remove("active"));
-    curYear="all";
+    btn.classList.add("active");
+    // 시즌은 해제, 연도는 유지(중복 가능)
     document.querySelectorAll("#era-filters .btn").forEach(b=>b.classList.remove("active"));
     curEra="all";
-    render();
-    // render() 후 active 재적용
-    btn.classList.add("active");
   }
+  render();
 }
 function setYear(btn){
   if(btn.classList.contains("active")){
@@ -1875,13 +1880,7 @@ function setYear(btn){
   } else {
     document.querySelectorAll("#year-filters .btn").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active"); curYear=btn.dataset.year;
-    // clear special(생일)
-    document.querySelectorAll(".btn-special").forEach(b=>{
-      b.classList.remove("active");
-      
-    });
-    curSpecial="all";
-    // clear season
+    // 시즌 해제, 생일은 유지(중복 가능)
     document.querySelectorAll("#era-filters .btn").forEach(b=>b.classList.remove("active"));
     curEra="all";
   }
@@ -2164,8 +2163,13 @@ function renderRadio(){
 }
 
 function resetBcast(){
-  curBcastSet=new Set(["live","radio","lassgo"]);
-  document.querySelectorAll(".btn-bcast").forEach(b=>b.classList.add("active"));
+  if(curBcastAllActive){
+    curBcastSet=new Set(["live"]);curBcastAllActive=false;
+    document.querySelectorAll(".btn-bcast").forEach(b=>b.classList.toggle("active",b.dataset.bcast==="live"));
+  } else {
+    curBcastSet=new Set(["live","radio","lassgo"]);curBcastAllActive=true;
+    document.querySelectorAll(".btn-bcast").forEach(b=>b.classList.add("active"));
+  }
   render();
 }
 function resetTGFilter(){
@@ -2177,10 +2181,17 @@ function resetTGFilter(){
 /* ── 방송 타입 복수선택 ── */
 function setBcast(btn){
   const t=btn.dataset.bcast;
-  if(curBcastSet.has(t)&&curBcastSet.size>1){
-    curBcastSet.delete(t);btn.classList.remove("active");
+  if(curBcastSet.has(t)){
+    if(curBcastSet.size===1){
+      curBcastSet=new Set(["live"]);curBcastAllActive=false;
+      document.querySelectorAll(".btn-bcast").forEach(b=>b.classList.toggle("active",b.dataset.bcast==="live"));
+    } else {
+      curBcastSet.delete(t);btn.classList.remove("active");
+      curBcastAllActive=curBcastSet.size===3;
+    }
   } else {
     curBcastSet.add(t);btn.classList.add("active");
+    curBcastAllActive=curBcastSet.size===3;
   }
   render();
 }
