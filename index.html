@@ -929,21 +929,21 @@ function openEdit(id,title,dateStr,type){
   // thumbnail in header
   const thumbWrap=document.getElementById("m-thumb-wrap");
   const thumbLink=document.getElementById("m-thumb-link");
-  let thumb=getThumbUrl(id);
-  const vurl=getVideoUrl(id);
-  // getThumbUrl이 비면 URL에서 직접 YouTube ID 추출
-  if(!thumb){
-    const item=findBySid(type,id);
-    const rawUrl=item?.url||vurl||"";
-    const ytm=rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/))([a-zA-Z0-9_-]{11})/);
-    if(ytm) thumb=`https://i.ytimg.com/vi/${ytm[1]}/mqdefault.jpg`;
-  }
+  // 모든 URL 소스 시도: localStorage → 시트 기본값 → findBySid item.url
+  const item=findBySid(type,id);
+  const localUrl=(getData(id).videoUrl||"").trim();
+  const defaultUrl=getDefaultUrl(id).trim();
+  const itemUrl=(item?.url||"").trim();
+  const rawUrl=localUrl||defaultUrl||itemUrl||"";
+  const ytm=rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/))([a-zA-Z0-9_-]{11})/);
+  let thumb=ytm?`https://i.ytimg.com/vi/${ytm[1]}/mqdefault.jpg`:"";
+  const vurl=rawUrl||"#";
   if(thumb){
-    thumbLink.href=vurl||'#';
+    thumbLink.href=vurl;
     thumbWrap.style.display="";
     const mImg=document.getElementById("m-thumb-img");
     mImg.removeAttribute("data-tried");
-    tryLoadThumb(mImg, thumb);
+    tryLoadThumb(mImg,thumb);
   } else {
     thumbWrap.style.display="none";
   }
@@ -1289,8 +1289,14 @@ function thumbErr(imgEl){
     imgEl.dataset.tried="1";
     imgEl.src="https://i.ytimg.com/vi/"+vid[1]+"/hqdefault.jpg";
   } else {
+    // 카드 썸네일 숨기기
     const wrap=imgEl.closest?imgEl.closest(".card-thumb-link"):null;
-    if(wrap)wrap.style.display="none";
+    if(wrap) wrap.style.display="none";
+    // 모달 썸네일 숨기기
+    if(imgEl.id==="m-thumb-img"){
+      const mWrap=document.getElementById("m-thumb-wrap");
+      if(mWrap) mWrap.style.display="none";
+    }
   }
 }
 window.thumbErr=thumbErr;
