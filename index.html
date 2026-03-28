@@ -2562,7 +2562,7 @@ function csvToSongs(rows){
   // 빈 발매일 행도 포함하도록 rawRows로 직접 파싱
   return rows.map(r=>{
     const date=(r[0]||"").trim()||lastDate;
-    const albumType=(r[1]||"").trim()||lastAlbumType;
+    const albumType=(r[1]||"").trim().startsWith("http") ? lastAlbumType : ((r[1]||"").trim()||lastAlbumType);
     const album=(r[2]||"").trim()||lastAlbum;
     const track=(r[3]||"").trim();
     const title=(r[4]||"").trim();
