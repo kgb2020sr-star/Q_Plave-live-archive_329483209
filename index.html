@@ -651,6 +651,98 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
   </div>
 </div>
 
+<div id="songs-filter" style="display:none;padding:10px 20px 6px;flex-direction:column;gap:6px;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:99;">
+      <!-- 검색 행 -->
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <button id="song-search-mode-btn" onclick="toggleSongSearchMode()"
+          style="background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:4px 11px;
+                 font-family:'Noto Sans KR',sans-serif;font-size:11px;cursor:pointer;color:rgba(255,255,255,.3);
+                 white-space:nowrap;transition:all .15s;flex-shrink:0;">검색</button>
+        <div class="search-row" style="flex:1;position:relative;display:flex;align-items:center;">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" id="song-search" type="text" placeholder="곡명, 앨범명 검색..."
+            oninput="curSongQ=this.value;document.getElementById('song-search-clear').style.display=this.value?'flex':'none';renderSongs();"
+            onkeydown="if(event.key==='Enter'){renderSongs();}if(event.key==='Escape'){this.value='';curSongQ='';document.getElementById('song-search-clear').style.display='none';renderSongs();}">
+          <button id="song-search-clear" onclick="document.getElementById('song-search').value='';curSongQ='';renderSongs();this.style.display='none';"
+            style="display:none;position:absolute;right:36px;background:none;border:none;cursor:pointer;font-size:13px;padding:0 4px;color:var(--muted);align-items:center;justify-content:center;">✕</button>
+          <button onclick="renderSongs()"
+            style="position:absolute;right:8px;background:none;border:none;cursor:pointer;font-size:16px;padding:0;line-height:1;color:var(--muted);">🔍</button>
+        </div>
+        <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;">
+          <button id="song-tag-mode-include" class="tc-tab active" style="padding:5px 10px;font-size:10px;border-radius:0;" onclick="setSongTagMode('include')">포함</button>
+          <button id="song-tag-mode-exact" class="tc-tab" style="padding:5px 10px;font-size:10px;border-left:1px solid var(--border);border-radius:0;" onclick="setSongTagMode('exact')">일치</button>
+        </div>
+        <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(168,85,247,.3);flex-shrink:0;">
+          <button id="song-sort-desc" onclick="setSongSort('desc',this)"
+            style="padding:5px 10px;font-size:10px;font-weight:600;background:rgba(168,85,247,.12);color:#a855f7;border:none;cursor:pointer;border-radius:0;">최신순▼</button>
+          <button id="song-sort-asc" onclick="setSongSort('asc',this)"
+            style="padding:5px 10px;font-size:10px;font-weight:600;background:transparent;color:var(--muted);border:none;border-left:1px solid rgba(168,85,247,.3);cursor:pointer;border-radius:0;">오래된순▲</button>
+        </div>
+      </div>
+
+      <!-- 구분선 + 필터 토글 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-top:0;">
+        <button onclick="toggleSongFilters()"
+          style="background:transparent;border:none;color:var(--muted);font-size:10px;
+                 cursor:pointer;padding:2px 4px;display:flex;align-items:center;gap:3px;
+                 font-family:'Noto Sans KR',sans-serif;white-space:nowrap;flex-shrink:0;transition:color .15s;"
+          onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">
+          필터 <span id="song-filter-arrow">▼</span>
+        </button>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.08);"></div>
+      </div>
+
+      <!-- 접히는 필터 영역 -->
+      <div id="songs-filters-collapsible" style="display:flex;flex-direction:column;gap:6px;overflow:hidden;transition:max-height .18s cubic-bezier(0.4,0,0.2,1),opacity .15s ease;max-height:300px;opacity:1;">
+      <!-- 앨범 -->
+      <div class="filter-row-labeled" style="align-items:flex-start;">
+        <button class="filter-label filter-label-btn grad-border" onclick="resetSongAlbum()" title="앨범 초기화">앨범</button>
+        <div class="filter-sep"></div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;flex:1;">
+          <button class="btn btn-song-album active" data-album="all">전체</button>
+          <button class="btn btn-song-album" data-album="기다릴게" style="--ac:#1E3A8A;--bc:#3b5bc8;--tc:#bfdbfe;">기다릴게</button>
+          <button class="btn btn-song-album" data-album="삼왜" style="--ac:rgba(244,114,182,.22);--bc:#f472b6;--tc:#fce7f3;">삼왜</button>
+          <button class="btn btn-song-album" data-album="여여름" style="--ac:rgba(132,204,22,.15);--bc:#84cc16;--tc:#d9f99d;">여여름</button>
+          <button class="btn btn-song-album" data-album="메리플리" style="--ac:rgba(100,116,139,.25);--bc:#64748b;--tc:#cbd5e1;">메리플리</button>
+          <button class="btn btn-song-album" data-album="웨사럽" style="--ac:rgba(148,163,184,.15);--bc:#94a3b8;--tc:#e2e8f0;">웨사럽</button>
+          <button class="btn btn-song-album" data-album="펌펍볼" style="--ac:rgba(249,115,22,.2);--bc:#f97316;--tc:#fed7aa;">펌펍볼</button>
+          <button class="btn btn-song-album" data-album="멈추지않아" style="--ac:rgba(55,65,81,.4);--bc:#6b7280;--tc:#d1d5db;">멈추지않아</button>
+          <button class="btn btn-song-album" data-album="대쉬" style="--ac:rgba(30,30,30,.6);--bc:#444;--tc:#aaa;">대쉬</button>
+          <button class="btn btn-song-album" data-album="카쿠렌보" style="--ac:rgba(56,189,248,.15);--bc:#38bdf8;--tc:#bae6fd;">카쿠렌보</button>
+          <button class="btn btn-song-album" data-album="숨꼭" style="--ac:rgba(249,168,212,.15);--bc:#f9a8d4;--tc:#fce7f3;">숨꼭</button>
+          <button class="btn btn-song-album" data-album="뿌우" style="--ac:rgba(30,58,138,.4);--bc:#3b5bc8;--tc:#bfdbfe;">뿌우</button>
+          <button class="btn btn-song-album" data-album="뿌우크리" style="--ac:rgba(248,113,113,.2);--bc:#f87171;--tc:#fecaca;">뿌우(크리)</button>
+          <button class="btn btn-song-album" data-album="이밤빌" style="--ac:rgba(100,60,200,.25);--bc:#8b5cf6;--tc:#ede9fe;">이밤빌</button>
+        </div>
+      </div>
+      <!-- 연도 -->
+      <div class="filter-row-labeled" style="align-items:flex-start;">
+        <button class="filter-label filter-label-btn grad-border" onclick="resetSongYear()" title="연도 초기화">연도</button>
+        <div class="filter-sep"></div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;flex:1;">
+          <button class="btn btn-song-year active" data-year="all">전체</button>
+          <button class="btn btn-song-year" data-year="2023">2023</button>
+          <button class="btn btn-song-year" data-year="2024">2024</button>
+          <button class="btn btn-song-year" data-year="2025">2025</button>
+          <button class="btn btn-song-year" data-year="2026">2026</button>
+        </div>
+      </div>
+      <!-- 구분 -->
+      <div class="filter-row-labeled" style="align-items:flex-start;">
+        <button class="filter-label filter-label-btn grad-border" onclick="resetSongType()" title="구분 초기화">구분</button>
+        <div class="filter-sep"></div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;flex:1;">
+          <button class="btn btn-song-type active" data-type="all">전체</button>
+          <button class="btn btn-song-type" data-type="타이틀">타이틀</button>
+          <button class="btn btn-song-type" data-type="수록곡">수록곡</button>
+          <button class="btn btn-song-type" data-type="ost">OST</button>
+          <button class="btn btn-song-type" data-type="inst">inst</button>
+        </div>
+      </div>
+      </div><!-- /songs-filters-collapsible -->
+
+</div>
+
 <main>
   <div class="result-count" id="result-count"></div>
   <div class="section-view active" id="view-broadcast">
@@ -659,41 +751,7 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
     <div id="lassgo-content"></div>
   </div>
   <div class="section-view" id="view-songs">
-    <div id="songs-filter" style="padding:10px 0 6px;">
-      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:5px;">
-        <span style="color:var(--muted);font-size:9px;letter-spacing:.08em;width:28px;flex-shrink:0;">앨범</span>
-        <button class="btn btn-song-album active" data-album="all">전체</button>
-        <button class="btn btn-song-album" data-album="기다릴게" style="--ac:#1E3A8A;--bc:#3b5bc8;--tc:#bfdbfe;">기다릴게</button>
-        <button class="btn btn-song-album" data-album="삼왜" style="--ac:rgba(244,114,182,.22);--bc:#f472b6;--tc:#fce7f3;">삼왜</button>
-        <button class="btn btn-song-album" data-album="여여름" style="--ac:rgba(132,204,22,.15);--bc:#84cc16;--tc:#d9f99d;">여여름</button>
-        <button class="btn btn-song-album" data-album="메리플리" style="--ac:rgba(100,116,139,.25);--bc:#64748b;--tc:#cbd5e1;">메리플리</button>
-        <button class="btn btn-song-album" data-album="웨사럽" style="--ac:rgba(148,163,184,.15);--bc:#94a3b8;--tc:#e2e8f0;">웨사럽</button>
-        <button class="btn btn-song-album" data-album="펌펍볼" style="--ac:rgba(249,115,22,.2);--bc:#f97316;--tc:#fed7aa;">펌펍볼</button>
-        <button class="btn btn-song-album" data-album="멈추지않아" style="--ac:rgba(55,65,81,.4);--bc:#6b7280;--tc:#d1d5db;">멈추지않아</button>
-        <button class="btn btn-song-album" data-album="대쉬" style="--ac:rgba(30,30,30,.6);--bc:#444;--tc:#aaa;">대쉬</button>
-        <button class="btn btn-song-album" data-album="카쿠렌보" style="--ac:rgba(56,189,248,.15);--bc:#38bdf8;--tc:#bae6fd;">카쿠렌보</button>
-        <button class="btn btn-song-album" data-album="숨꼭" style="--ac:rgba(249,168,212,.15);--bc:#f9a8d4;--tc:#fce7f3;">숨꼭</button>
-        <button class="btn btn-song-album" data-album="뿌우" style="--ac:rgba(30,58,138,.4);--bc:#3b5bc8;--tc:#bfdbfe;">뿌우</button>
-        <button class="btn btn-song-album" data-album="뿌우크리" style="--ac:rgba(248,113,113,.2);--bc:#f87171;--tc:#fecaca;">뿌우(크리)</button>
-        <button class="btn btn-song-album" data-album="이밤빌" style="--ac:rgba(100,60,200,.25);--bc:#8b5cf6;--tc:#ede9fe;">이밤빌</button>
-      </div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:5px;">
-        <span style="color:var(--muted);font-size:9px;letter-spacing:.08em;width:28px;flex-shrink:0;">연도</span>
-        <button class="btn btn-song-year active" data-year="all">전체</button>
-        <button class="btn btn-song-year" data-year="2023">2023</button>
-        <button class="btn btn-song-year" data-year="2024">2024</button>
-        <button class="btn btn-song-year" data-year="2025">2025</button>
-        <button class="btn btn-song-year" data-year="2026">2026</button>
-      </div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
-        <span style="color:var(--muted);font-size:9px;letter-spacing:.08em;width:28px;flex-shrink:0;">구분</span>
-        <button class="btn btn-song-type active" data-type="all">전체</button>
-        <button class="btn btn-song-type" data-type="타이틀">타이틀</button>
-        <button class="btn btn-song-type" data-type="수록곡">수록곡</button>
-        <button class="btn btn-song-type" data-type="ost">OST</button>
-        <button class="btn btn-song-type" data-type="inst">inst</button>
-      </div>
-    </div>
+
     <div id="songs-content"></div>
   </div>
 
@@ -1817,6 +1875,8 @@ function updateStickyOffsets(){
   if(tabBar){tabBar.style.top=(fixedH+headerH)+"px";}
   const tabH=tabBar?tabBar.getBoundingClientRect().height:0;
   if(ctrl){ctrl.style.top=(fixedH+headerH+tabH)+"px";}
+  const sf=document.getElementById("songs-filter");
+  if(sf&&sf.style.position==="sticky"){sf.style.top=(fixedH+headerH+tabH)+"px";}
 }
 window.addEventListener("load",updateStickyOffsets);
 window.addEventListener("resize",()=>{updateStickyOffsets();updateEraRowSeps();});
@@ -1850,9 +1910,16 @@ function switchTab(t,btn){
   document.querySelectorAll(".section-view").forEach(v=>v.classList.remove("active"));
   const viewId=(t==="broadcast")?"view-broadcast":"view-songs";
   document.getElementById(viewId).classList.add("active");
-  const mf=document.getElementById("main-filters-wrap");
-  if(mf) mf.style.display=(t==="songs")?"none":"";
-  if(t==="songs"){renderSongs();return;}
+  const ctrl=document.querySelector(".controls");
+  const sf=document.getElementById("songs-filter");
+  if(t==="songs"){
+    if(ctrl) ctrl.style.display="none";
+    if(sf){sf.style.display="flex";sf.style.position="sticky";setTimeout(updateStickyOffsets,50);}
+    renderSongs();return;
+  } else {
+    if(ctrl) ctrl.style.display="";
+    if(sf){sf.style.display="none";sf.style.position="";}
+  }
   render();
 }
 function resetYear(){
@@ -2399,7 +2466,29 @@ function renderLassgo(){
    🎵 발매곡
 ══════════════════════════════════════════════ */
 let SONGS=[];
-let curSongAlbum="all", curSongYear="all", curSongType="all";
+let curSongAlbum="all", curSongYear="all", curSongType="all", curSongQ="", curSongSort="desc", curSongTagMode="include", curSongTitleOnly=false;
+
+function toggleSongSearchMode(){
+  curSongTitleOnly=!curSongTitleOnly;
+  const btn=document.getElementById("song-search-mode-btn");
+  if(curSongTitleOnly){btn.textContent="제목";btn.style.borderColor="rgba(255,255,255,.8)";btn.style.color="#fff";}
+  else{btn.textContent="검색";btn.style.borderColor="rgba(255,255,255,.12)";btn.style.color="rgba(255,255,255,.3)";}
+  renderSongs();
+}
+function setSongTagMode(m){
+  curSongTagMode=m;
+  document.getElementById("song-tag-mode-include").classList.toggle("active",m==="include");
+  document.getElementById("song-tag-mode-exact").classList.toggle("active",m==="exact");
+  renderSongs();
+}
+function setSongSort(s){
+  curSongSort=s;
+  const desc=document.getElementById("song-sort-desc");
+  const asc=document.getElementById("song-sort-asc");
+  if(s==="desc"){desc.style.background="rgba(168,85,247,.12)";desc.style.color="#a855f7";asc.style.background="transparent";asc.style.color="var(--muted)";}
+  else{asc.style.background="rgba(168,85,247,.12)";asc.style.color="#a855f7";desc.style.background="transparent";desc.style.color="var(--muted)";}
+  renderSongs();
+}
 
 // 시즌별 스타일
 const SONG_ERA_STYLE={
@@ -2490,6 +2579,19 @@ function renderSongs(){
       if(curSongType==="ost"&&!t.includes("ost")&&!t.includes("참여")) return false;
       if(curSongType==="inst"&&!s.title.toLowerCase().includes("inst")) return false;
     }
+    if(curSongQ){
+      const q=curSongQ.toLowerCase();
+      if(curSongTitleOnly){
+        if(!s.title.toLowerCase().includes(q)) return false;
+      } else {
+        const haystack=(s.title+" "+s.album+" "+(s.albumType||"")+" "+(s.type||"")).toLowerCase();
+        if(curSongTagMode==="exact"){
+          if(!haystack.split(" ").some(w=>w===q)) return false;
+        } else {
+          if(!haystack.includes(q)) return false;
+        }
+      }
+    }
     return true;
   });
   if(!f.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎵</div>검색 결과가 없어요</div>';return;}
@@ -2502,7 +2604,13 @@ function renderSongs(){
     byAlbum[k].songs.push(s);
   });
 
-  el.innerHTML=Object.keys(byAlbum).map(album=>{
+  const sortedAlbums=Object.keys(byAlbum).sort((a,b)=>{
+    const da=byAlbum[a].date||"";
+    const db=byAlbum[b].date||"";
+    return curSongSort==="desc"?db.localeCompare(da):da.localeCompare(db);
+  });
+
+  el.innerHTML=sortedAlbums.map(album=>{
     const {songs,date,albumType}=byAlbum[album];
     const era=getSongEra(album,songs[0]?.title||"");
     const st=era?SONG_ERA_STYLE[era]:{bg:"rgba(255,255,255,.05)",border:"#444",text:"#aaa"};
@@ -2537,6 +2645,40 @@ function renderSongs(){
       <div class="songs-grid">${cardsHtml}</div>
     </div>`;
   }).join("");
+}
+
+let songFiltersOpen=true;
+function toggleSongFilters(){
+  const el=document.getElementById("songs-filters-collapsible");
+  const arrow=document.getElementById("song-filter-arrow");
+  if(!el||!arrow) return;
+  if(songFiltersOpen){
+    el.style.maxHeight="0"; el.style.opacity="0";
+    arrow.textContent="▼"; songFiltersOpen=false;
+  } else {
+    el.style.maxHeight="300px"; el.style.opacity="1";
+    arrow.textContent="▲"; songFiltersOpen=true;
+  }
+}
+
+// 발매곡 필터 라벨 리셋 함수
+function resetSongAlbum(){
+  curSongAlbum="all";
+  document.querySelectorAll(".btn-song-album").forEach(b=>b.classList.remove("active"));
+  document.querySelector(".btn-song-album[data-album='all']")?.classList.add("active");
+  renderSongs();
+}
+function resetSongYear(){
+  curSongYear="all";
+  document.querySelectorAll(".btn-song-year").forEach(b=>b.classList.remove("active"));
+  document.querySelector(".btn-song-year[data-year='all']")?.classList.add("active");
+  renderSongs();
+}
+function resetSongType(){
+  curSongType="all";
+  document.querySelectorAll(".btn-song-type").forEach(b=>b.classList.remove("active"));
+  document.querySelector(".btn-song-type[data-type='all']")?.classList.add("active");
+  renderSongs();
 }
 
 // 발매곡 필터 버튼
