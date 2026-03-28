@@ -39,10 +39,6 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
   background:linear-gradient(90deg,var(--yejun) 0%,var(--yejun) 12%,var(--noah) 28%,var(--bambi) 50%,var(--eunho) 72%,var(--hamin) 88%,var(--hamin) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .logo-sub{font-size:11px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:5px;}
-.stats-row{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
-.stat{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 14px;text-align:center;}
-.stat-num{font-family:'Syne',sans-serif;font-size:17px;font-weight:600;color:var(--all);}
-.stat-label{font-size:10px;color:var(--muted);letter-spacing:.08em;margin-top:1px;}
 
 .tab-bar{position:sticky;top:44px;z-index:100;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
 .tab-row{max-width:1200px;margin:0 auto;display:flex;padding:0 16px;align-items:center;justify-content:space-between;}
@@ -57,7 +53,7 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
 .tab-btn:hover{color:var(--text);}
 .tab-btn.active{color:var(--text);border-bottom-color:var(--noah);}
 
-.controls{position:sticky;top:44px;z-index:99;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 20px;}
+.controls{position:sticky;top:44px;z-index:99;background:rgba(6,6,17,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 20px;isolation:isolate;}
 #filters-collapsible{transition:max-height .18s cubic-bezier(0.4,0,0.2,1),opacity .15s ease;overflow:hidden;max-height:300px;opacity:1;position:relative;}
 #filters-collapsible.collapsed{max-height:0!important;opacity:0;}
 #filters-collapsible::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to bottom,transparent,var(--bg));opacity:0;pointer-events:none;transition:opacity .1s ease;z-index:1;}
@@ -97,6 +93,10 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
 @media(max-width:700px){
   .era-scroll{overflow-x:visible;overflow-y:visible;flex-wrap:wrap!important;}
 }
+@media(max-width:500px){
+  .filter-row-labeled > div[style*="flex-wrap:wrap"]{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;}
+  .filter-row-labeled > div[style*="flex-wrap:wrap"]::-webkit-scrollbar{display:none;}
+}
 .era-row-sep{width:100%;height:1px;background:var(--border);flex-shrink:0;margin:2px 0;}
 /* 생일: 미선택=흐림, 선택=민트 테두리만 */
 .btn.btn-special{border:1px solid rgba(255,255,255,.12) !important;color:rgba(255,255,255,.3) !important;background:transparent !important;}
@@ -107,7 +107,9 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
 .btn.btn-comeback.active{border:1px solid #e8c97a !important;color:#e8c97a !important;background:transparent !important;}
 .btn.btn-comeback:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.04);}
 .filter-sep{width:1px;background:rgba(255,255,255,.1);flex-shrink:0;height:22px;align-self:center;}
-.filter-row-labeled{display:flex;align-items:center;gap:10px;}
+.filter-row-labeled{display:flex;align-items:center;gap:10px;min-width:0;}
+.filter-row-labeled > div[style*="flex:1"]{min-width:0;overflow-x:auto;scrollbar-width:none;}
+.filter-row-labeled > div[style*="flex:1"]::-webkit-scrollbar{display:none;}
 .card.special-bday{box-shadow:0 0 0 1.5px rgba(45,212,191,.6),0 0 16px rgba(45,212,191,.2);}
 .card.special-bday::before{opacity:1!important;background:linear-gradient(90deg,#2dd4bf,#a7f3d0,#2dd4bf)!important;}
 .card.special-milestone{box-shadow:0 0 0 1.5px rgba(45,212,191,.6),0 0 16px rgba(45,212,191,.2);}
@@ -405,12 +407,6 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 <header>
   <div class="logo-title">PLAVE ARCHIVE</div>
   <div class="logo-sub">라이브 방송 · 라디오 아카이브</div>
-  <div class="stats-row">
-    <div class="stat"><div class="stat-num" id="stat-live">—</div><div class="stat-label">라이브 방송</div></div>
-    <div class="stat"><div class="stat-num" id="stat-radio">—</div><div class="stat-label">라디오 회차</div></div>
-    <div class="stat"><div class="stat-num" id="stat-lassgo">—</div><div class="stat-label">라쓰고 플레이브</div></div>
-    <div class="stat"><div class="stat-num" id="stat-songs">—</div><div class="stat-label">발매곡</div></div>
-  </div>
 </header>
 
 <div class="tab-bar">
@@ -948,9 +944,15 @@ function openEdit(id,title,dateStr,type){
   const modal=document.getElementById("edit-modal");
   document.body.appendChild(modal);
   modal.classList.add("open");
+  document.querySelector("header")?.style.setProperty("z-index","0");
+  document.querySelector(".tab-bar")?.style.setProperty("z-index","0");
+  document.querySelector(".controls")?.style.setProperty("z-index","0");
 }
 function closeModal(){
   document.getElementById("edit-modal").classList.remove("open");
+  document.querySelector("header")?.style.removeProperty("z-index");
+  document.querySelector(".tab-bar")?.style.removeProperty("z-index");
+  document.querySelector(".controls")?.style.removeProperty("z-index");
   mId=null;render();
 }
 function setTCTab(t){
@@ -1463,7 +1465,6 @@ async function loadFromSheets(onStatus){
               if(vid) b.thumb=`https://i.ytimg.com/vi/${vid[1]}/mqdefault.jpg`;
             }
           });
-          document.getElementById("stat-live").textContent=L.length;
           loaded=true;
         }
       }
@@ -1487,7 +1488,6 @@ async function loadFromSheets(onStatus){
               R.push({y:+y,d,dj:djArr,g:gArr,url:url||"",thumb:thumb||""});
             }
           });
-          document.getElementById("stat-radio").textContent=R.length;
           loaded=true;
         }
       }
@@ -1509,7 +1509,6 @@ async function loadFromSheets(onStatus){
               P.push({y:+y,d,ep:+ep||0,t,url:url||"",thumb:thumb||""});
             }
           });
-          document.getElementById("stat-lassgo").textContent=P.length;
           loaded=true;
         }
       }
@@ -1608,8 +1607,6 @@ function getThumbUrl(sid){
 }
 function getVideoUrl(sid){const d=getData(sid);return d.videoUrl||getDefaultUrl(sid);}
 
-document.getElementById("stat-live").textContent=L.length;
-document.getElementById("stat-radio").textContent=R.length;
 
 function updateAlPreview(){
   const dateVal=document.getElementById("al-date").value;
@@ -1705,7 +1702,6 @@ function submitAddLive(){
     const raw=JSON.parse(localStorage.getItem("plave_v2_"+sid)||"{}");
     if(!raw.videoUrl){raw.videoUrl=url;localStorage.setItem("plave_v2_"+sid,JSON.stringify(raw));}
   }
-  document.getElementById("stat-live").textContent=L.length;
   render();
   // switch to live tab
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
@@ -1727,7 +1723,6 @@ function submitAddLive(){
         L.push(e);
       }
     });
-    if(customs.length) document.getElementById("stat-live").textContent=L.length;
   }catch{}
 })();
 /* ── sticky offset calc ── */
@@ -2318,7 +2313,6 @@ function renderUnified(){
 
 /* ── LASSGO DATA ── */
 const P=[];
-document.getElementById("stat-lassgo").textContent=P.length;
 
 function renderLassgo(){
   const f=P.filter(p=>{
@@ -2444,7 +2438,6 @@ async function loadSongsFromSheet(){
     if(!res.ok) return;
     const rows=parseCSV(await res.text());
     SONGS=csvToSongs(rows);
-    document.getElementById("stat-songs").textContent=SONGS.length;
     if(curTab==="songs") renderSongs();
   }catch(e){console.warn("발매곡 로드 실패",e);}
 }
