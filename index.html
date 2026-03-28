@@ -823,6 +823,12 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 
 <script>
 /* ── helpers ── */
+/* ── YouTube ID 추출 helper ── */
+function ytThumb(url){
+  if(!url) return "";
+  const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
+  return m?`https://i.ytimg.com/vi/${m[1]}/mqdefault.jpg`:"";
+}
 const MC={예준:"yejun",노아:"noah",밤비:"bambi",은호:"eunho",하민:"hamin",전원:"all"};
 const ME={예준:"💙",노아:"💜",밤비:"🩷",은호:"❤️",하민:"🖤",전원:"✨"};
 const TGK={a:"tagsA",b:"tagsB",c:"tagsC"};
@@ -1462,7 +1468,7 @@ function parseCSV(text){
     }
     cols.push(cur.trim());
     return cols;
-  }).filter(r=>r.length>1&&r[0]);
+  }).filter(r=>r.length>1&&r.some(c=>c));
 }
 
 /* CSV → L[] 형식 변환
@@ -2551,15 +2557,22 @@ function getSongBadgeLabel(type){
 // 시트 컬럼: 발매일(0) 앨범구분(1) 앨범명(2) 트랙#(3) 곡명(4) 곡구분(5) 링크(6)
 // 시트 컬럼: 발매일(A=0) 앨범구분(B=1) 앨범명(C=2) 트랙#(D=3) 곡명(E=4) 곡구분(F=5) [숨김G=6] [숨김H=7] 링크(I=8)
 function csvToSongs(rows){
+  // 발매일/앨범구분은 병합셀이라 첫 행에만 있음 → 이전 값 이어받기
+  let lastDate="", lastAlbumType="", lastAlbum="";
+  const allRows=[];
+  // 빈 발매일 행도 포함하도록 rawRows로 직접 파싱
   return rows.map(r=>{
-    const date=(r[0]||"").trim();
-    const albumType=(r[1]||"").trim();
-    const album=(r[2]||"").trim();
+    const date=(r[0]||"").trim()||lastDate;
+    const albumType=(r[1]||"").trim()||lastAlbumType;
+    const album=(r[2]||"").trim()||lastAlbum;
     const track=(r[3]||"").trim();
     const title=(r[4]||"").trim();
     const type=(r[5]||"").trim();
-    const url=(r[8]||"").trim(); // 링크는 I열(index 8)
+    const url=(r[8]||"").trim();
     if(!title) return null;
+    if((r[0]||"").trim()) lastDate=(r[0]||"").trim();
+    if((r[1]||"").trim()) lastAlbumType=(r[1]||"").trim();
+    if((r[2]||"").trim()) lastAlbum=(r[2]||"").trim();
     return {date,albumType,album,track,title,type,url};
   }).filter(Boolean);
 }
@@ -2630,8 +2643,7 @@ function renderSongs(){
       const sid=`song_${s.date}_${(s.title||"").replace(/[^가-힣a-zA-Z0-9]/g,"").slice(0,15)}`;
       const bc=getSongBadgeClass(s.type);
       const bl=getSongBadgeLabel(s.type);
-      const ytId=(s.url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
-      const thumb=ytId?`https://i.ytimg.com/vi/${ytId[1]}/mqdefault.jpg`:"";
+      const thumb=ytThumb(s.url);
       const bgStyle=thumb?`background-image:url('${thumb}')`:(`background:${st.bg}`);
       return`<div class="song-card" onclick="openSongModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">
         <div class="song-thumb-wrap">
@@ -2728,8 +2740,7 @@ function openSongModal(s){
   const bl=getSongBadgeLabel(s.type);
   const era=getSongEra(s.album,s.title);
   const st=era?SONG_ERA_STYLE[era]:{bg:"rgba(255,255,255,.05)",border:"#444",text:"#aaa"};
-  const ytId=s.url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
-  const thumb=ytId?`https://i.ytimg.com/vi/${ytId[1]}/mqdefault.jpg`:"";
+  const thumb=ytThumb(s.url);
   const bgStyle=thumb?`background-image:url('${encodeURI(thumb)}')`:(`background:${st.bg}`);
 
   const tagsData=JSON.parse(localStorage.getItem("plave_v2_"+sid)||"{}");
