@@ -63,8 +63,9 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
 .controls-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
 .search-row{position:relative;}
 .search-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;
-  padding:8px 14px 8px 36px;color:rgba(255,255,255,.55);font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
-.search-input:focus{border-color:rgba(168,85,247,.5);color:rgba(255,255,255,.75);}
+  padding:8px 72px 8px 36px;color:#ffffff;font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:rgba(168,85,247,.5);background:var(--bg3);}
+.search-input:-webkit-autofill,.search-input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px var(--bg3) inset;-webkit-text-fill-color:#ffffff;}
 .search-input::placeholder{color:var(--muted);}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
 .filter-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
@@ -90,9 +91,6 @@ header{position:sticky;top:44px;z-index:101;background:rgba(6,6,17,.97);backdrop
 .filter-label-btn{white-space:nowrap;transition:color .15s;}
 .era-scroll{overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap!important;scrollbar-width:none;-ms-overflow-style:none;min-width:0;}
 .era-scroll::-webkit-scrollbar{display:none;}
-@media(max-width:700px){
-  .era-scroll{overflow-x:visible;overflow-y:visible;flex-wrap:wrap!important;}
-}
 @media(max-width:500px){
   .filter-row-labeled > div[style*="flex-wrap:wrap"]{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;}
   .filter-row-labeled > div[style*="flex-wrap:wrap"]::-webkit-scrollbar{display:none;}
@@ -532,8 +530,11 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
       <div style="width:1px;height:18px;background:rgba(255,255,255,.1);flex-shrink:0;"></div>
       <div class="search-row" style="flex:1;position:relative;display:flex;align-items:center;">
         <input class="search-input" id="search" type="text" placeholder="검색어 입력 후 Enter"
-          style="padding-right:36px;"
+          oninput="document.getElementById('search-clear').style.display=this.value?'flex':'none';"
           onkeydown="if(event.key==='Enter'){render();}">
+        <button id="search-clear" onclick="document.getElementById('search').value='';curQ='';render();this.style.display='none';"
+          style="display:none;position:absolute;right:36px;background:none;border:none;cursor:pointer;
+                 font-size:13px;padding:0 4px;line-height:1;color:var(--muted);align-items:center;justify-content:center;">✕</button>
         <button onclick="render()"
           style="position:absolute;right:8px;background:none;border:none;cursor:pointer;
                  font-size:16px;padding:0;line-height:1;color:var(--muted);">🔍</button>
@@ -927,10 +928,16 @@ function openEdit(id,title,dateStr,type){
   else{tb.textContent="📺 라이브";tb.className="badge badge-type-live";}
   // thumbnail in header
   const thumbWrap=document.getElementById("m-thumb-wrap");
-  const thumbImg=document.getElementById("m-thumb-img");
   const thumbLink=document.getElementById("m-thumb-link");
-  const thumb=getThumbUrl(id);
+  let thumb=getThumbUrl(id);
   const vurl=getVideoUrl(id);
+  // getThumbUrl이 비면 URL에서 직접 YouTube ID 추출
+  if(!thumb){
+    const item=findBySid(type,id);
+    const rawUrl=item?.url||vurl||"";
+    const ytm=rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|live\/|embed\/))([a-zA-Z0-9_-]{11})/);
+    if(ytm) thumb=`https://i.ytimg.com/vi/${ytm[1]}/mqdefault.jpg`;
+  }
   if(thumb){
     thumbLink.href=vurl||'#';
     thumbWrap.style.display="";
