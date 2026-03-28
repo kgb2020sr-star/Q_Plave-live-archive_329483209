@@ -427,7 +427,7 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 </div>
 
 <!-- 연동하기 고정 바 (최상단 단독) -->
-<div style="position:fixed;top:0;right:0;left:0;z-index:999;display:flex;justify-content:flex-end;align-items:center;gap:12px;padding:6px 16px;background:rgba(11,11,30,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);">
+<div id="sync-fixed-bar" style="position:fixed;top:0;right:0;left:0;z-index:999;display:flex;justify-content:flex-end;align-items:center;gap:12px;padding:6px 16px;background:rgba(11,11,30,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);">
   <span id="sync-status" style="font-size:10px;font-weight:400;color:rgba(255,255,255,.35);font-family:'Noto Sans KR',sans-serif;"></span>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:100px;">
     <button id="sync-btn" onclick="syncAll()"
@@ -809,6 +809,11 @@ function normDRight(d){
   const p=d.split(".");
   if(p.length!==2) return d;
   return p[0].padStart(2,"0")+"."+p[1].padEnd(2,"0");
+}
+function nextDay(d){
+  const p=normD(d).split(".");
+  const dt=new Date(2000,+p[0]-1,+p[1]+1);
+  return String(dt.getMonth()+1).padStart(2,"0")+"."+String(dt.getDate()).padStart(2,"0");
 }
 function isSpecialBday(d){
   const ndL=normD(d);    // "11.1" → "11.01" (11월 1일 해석)
@@ -1817,16 +1822,15 @@ window.addEventListener("scroll",()=>{
 },{passive:true});
 
 function updateStickyOffsets(){
-  const syncH=document.querySelector("#sync-fixed-wrap, [id^='sync']")?.offsetHeight||44;
-  const fixedBar=document.querySelector("div[style*='position:fixed']");
-  const fixedH=fixedBar?fixedBar.offsetHeight:44;
+  const fixedBar=document.getElementById("sync-fixed-bar");
+  const fixedH=fixedBar?fixedBar.getBoundingClientRect().height:44;
   const header=document.querySelector("header");
   const tabBar=document.querySelector(".tab-bar");
   const ctrl=document.querySelector(".controls");
   if(header){header.style.top=fixedH+"px";}
-  const headerH=header?header.offsetHeight:0;
+  const headerH=header?header.getBoundingClientRect().height:0;
   if(tabBar){tabBar.style.top=(fixedH+headerH)+"px";}
-  const tabH=tabBar?tabBar.offsetHeight:0;
+  const tabH=tabBar?tabBar.getBoundingClientRect().height:0;
   if(ctrl){ctrl.style.top=(fixedH+headerH+tabH)+"px";}
 }
 window.addEventListener("load",updateStickyOffsets);
