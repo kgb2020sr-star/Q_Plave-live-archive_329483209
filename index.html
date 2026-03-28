@@ -2553,25 +2553,25 @@ function getSongBadgeLabel(type){
   return type;
 }
 
-// 시트 컬럼: 발매일(0) 앨범구분(1) 앨범명(2) 트랙#(3) 곡명(4) 곡구분(5) 링크(6)
-// 시트 컬럼: 발매일(A=0) 앨범구분(B=1) 앨범명(C=2) 트랙#(D=3) 곡명(E=4) 곡구분(F=5) [숨김G=6] [숨김H=7] 링크(I=8)
+// 시트 컬럼: 발매일(A) 앨범구분(B) 앨범명(C) 트랙#(D) 곡명(E) 곡구분(F) [숨김...] 링크(마지막 http 컬럼)
 function csvToSongs(rows){
-  // 발매일/앨범구분은 병합셀이라 첫 행에만 있음 → 이전 값 이어받기
   let lastDate="", lastAlbumType="", lastAlbum="";
-  const allRows=[];
-  // 빈 발매일 행도 포함하도록 rawRows로 직접 파싱
   return rows.map(r=>{
+    // URL은 고정 인덱스 대신 http로 시작하는 컬럼 스캔
+    const url=(r.find(v=>(v||"").trim().startsWith("http"))||"").trim();
     const date=(r[0]||"").trim()||lastDate;
-    const albumType=(r[1]||"").trim().startsWith("http") ? lastAlbumType : ((r[1]||"").trim()||lastAlbumType);
+    // albumType: r[1]이 URL이면 lastAlbumType 사용
+    const rawB=(r[1]||"").trim();
+    const albumType=(rawB&&!rawB.startsWith("http"))?rawB:lastAlbumType;
     const album=(r[2]||"").trim()||lastAlbum;
     const track=(r[3]||"").trim();
     const title=(r[4]||"").trim();
-    const type=(r[5]||"").trim();
-    const url=(r[8]||"").trim();
+    // 곡구분: r[5]가 URL이면 다음 비URL 비빈 컬럼 탐색
+    const rawF=(r[5]||"").trim();
+    const type=(rawF&&!rawF.startsWith("http"))?rawF:"";
     if(!title) return null;
     if((r[0]||"").trim()) lastDate=(r[0]||"").trim();
-    const rawAlbumType=(r[1]||"").trim();
-    if(rawAlbumType&&!rawAlbumType.startsWith("http")) lastAlbumType=rawAlbumType;
+    if(rawB&&!rawB.startsWith("http")) lastAlbumType=rawB;
     if((r[2]||"").trim()) lastAlbum=(r[2]||"").trim();
     return {date,albumType,album,track,title,type,url};
   }).filter(Boolean);
