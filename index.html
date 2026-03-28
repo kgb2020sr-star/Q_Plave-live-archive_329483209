@@ -353,7 +353,7 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 .song-thumb-wrap{width:100%;aspect-ratio:1;position:relative;overflow:hidden;background:#111;}
 .song-thumb-blur{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(16px);opacity:.6;transform:scale(1.15);}
 .song-thumb-img{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-.song-thumb-img img{max-width:100%;max-height:100%;object-fit:contain;}
+.song-thumb-img img{width:100%;height:100%;object-fit:cover;}
 .song-thumb-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;}
 .song-top-badges{position:absolute;top:5px;left:5px;display:flex;gap:3px;flex-wrap:wrap;}
 .song-link-icon{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.6);color:#aaa;padding:2px 5px;border-radius:4px;font-size:10px;}
@@ -635,11 +635,11 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
         <button class="btn btn-era era-여여름" data-era="여여름" onclick="setEra(this)">여여름</button>
         <button class="btn btn-era era-메리플리" data-era="메리플리" onclick="setEra(this)">메리플리</button>
         <button class="btn btn-era" data-era="24새해" onclick="setEra(this)">24새해</button>
-        <button class="btn btn-era era-웨사럽" data-era="웨사럽" onclick="setEra(this)">웨사럽</button>
+        <button class="btn btn-era era-웨사럽" data-era="웨사럽" onclick="setEra(this)">W4L</button>
         <button class="btn btn-era era-펌펍볼" data-era="펌펍볼" onclick="setEra(this)">펌펍볼</button>
         <button class="btn btn-era" data-era="25새해" onclick="setEra(this)">25새해</button>
         <button class="btn btn-era era-대쉬" data-era="대쉬" onclick="setEra(this)">대쉬</button>
-        <button class="btn btn-era era-카쿠렌보" data-era="카쿠렌보" onclick="setEra(this)">카쿠렌보</button>
+        <button class="btn btn-era era-카쿠렌보" data-era="카쿠렌보" onclick="setEra(this)">카쿠</button>
         <button class="btn btn-era era-숨꼭" data-era="숨꼭" onclick="setEra(this)">숨꼭</button>
         <button class="btn btn-era era-뿌우" data-era="뿌우" onclick="setEra(this)">뿌우</button>
         <button class="btn btn-era era-뿌우크리" data-era="뿌우(크리)" onclick="setEra(this)">뿌우(크리)</button>
@@ -681,7 +681,7 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
       </div>
 
       <!-- 구분선 + 필터 토글 -->
-      <div style="display:flex;align-items:center;gap:8px;margin-top:0;">
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
         <button onclick="toggleSongFilters()"
           style="background:transparent;border:none;color:var(--muted);font-size:10px;
                  cursor:pointer;padding:2px 4px;display:flex;align-items:center;gap:3px;
@@ -695,7 +695,7 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
       <!-- 접히는 필터 영역 -->
       <div id="songs-filters-collapsible" style="display:flex;flex-direction:column;gap:6px;overflow:hidden;transition:max-height .18s cubic-bezier(0.4,0,0.2,1),opacity .15s ease;max-height:300px;opacity:1;">
       <!-- 앨범 -->
-      <div class="filter-row-labeled" style="align-items:flex-start;">
+      <div class="filter-row-labeled" style="align-items:flex-start;margin-top:6px;">
         <button class="filter-label filter-label-btn grad-border" onclick="resetSongAlbum()" title="앨범 초기화">앨범</button>
         <div class="filter-sep"></div>
         <div style="display:flex;gap:5px;flex-wrap:wrap;flex:1;">
@@ -704,14 +704,13 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
           <button class="btn btn-song-album" data-album="삼왜" style="--ac:rgba(244,114,182,.22);--bc:#f472b6;--tc:#fce7f3;">삼왜</button>
           <button class="btn btn-song-album" data-album="여여름" style="--ac:rgba(132,204,22,.15);--bc:#84cc16;--tc:#d9f99d;">여여름</button>
           <button class="btn btn-song-album" data-album="메리플리" style="--ac:rgba(100,116,139,.25);--bc:#64748b;--tc:#cbd5e1;">메리플리</button>
-          <button class="btn btn-song-album" data-album="웨사럽" style="--ac:rgba(148,163,184,.15);--bc:#94a3b8;--tc:#e2e8f0;">웨사럽</button>
+          <button class="btn btn-song-album" data-album="웨사럽" style="--ac:rgba(148,163,184,.15);--bc:#94a3b8;--tc:#e2e8f0;">W4L</button>
           <button class="btn btn-song-album" data-album="펌펍볼" style="--ac:rgba(249,115,22,.2);--bc:#f97316;--tc:#fed7aa;">펌펍볼</button>
-          <button class="btn btn-song-album" data-album="멈추지않아" style="--ac:rgba(55,65,81,.4);--bc:#6b7280;--tc:#d1d5db;">멈추지않아</button>
+          <button class="btn btn-song-album" data-album="멈추지않아" style="--ac:rgba(55,65,81,.4);--bc:#6b7280;--tc:#d1d5db;">멈추지</button>
           <button class="btn btn-song-album" data-album="대쉬" style="--ac:rgba(30,30,30,.6);--bc:#444;--tc:#aaa;">대쉬</button>
-          <button class="btn btn-song-album" data-album="카쿠렌보" style="--ac:rgba(56,189,248,.15);--bc:#38bdf8;--tc:#bae6fd;">카쿠렌보</button>
+          <button class="btn btn-song-album" data-album="카쿠렌보" style="--ac:rgba(56,189,248,.15);--bc:#38bdf8;--tc:#bae6fd;">카쿠</button>
           <button class="btn btn-song-album" data-album="숨꼭" style="--ac:rgba(249,168,212,.15);--bc:#f9a8d4;--tc:#fce7f3;">숨꼭</button>
-          <button class="btn btn-song-album" data-album="뿌우" style="--ac:rgba(30,58,138,.4);--bc:#3b5bc8;--tc:#bfdbfe;">뿌우</button>
-          <button class="btn btn-song-album" data-album="뿌우크리" style="--ac:rgba(248,113,113,.2);--bc:#f87171;--tc:#fecaca;">뿌우(크리)</button>
+          <button class="btn btn-song-album" data-album="뿌우통합" style="--ac:rgba(30,58,138,.4);--bc:#3b5bc8;--tc:#bfdbfe;">뿌우</button>
           <button class="btn btn-song-album" data-album="이밤빌" style="--ac:rgba(100,60,200,.25);--bc:#8b5cf6;--tc:#ede9fe;">이밤빌</button>
         </div>
       </div>
@@ -2595,7 +2594,11 @@ function renderSongs(){
     if(curSongYear!=="all"&&!s.date.startsWith(curSongYear)) return false;
     if(curSongAlbum!=="all"){
       const era=getSongEra(s.album,s.title);
-      if(era!==curSongAlbum) return false;
+      if(curSongAlbum==="뿌우통합"){
+        if(era!=="뿌우"&&era!=="뿌우크리") return false;
+      } else {
+        if(era!==curSongAlbum) return false;
+      }
     }
     if(curSongType!=="all"){
       const t=(s.type||"").toLowerCase();
@@ -2755,7 +2758,7 @@ function openSongModal(s){
   <div class="song-modal-box">
     <a class="song-modal-left" ${s.url?`href="${escH(s.url)}" target="_blank"`:""}  style="text-decoration:none;">
       <div class="song-thumb-blur" style="${bgStyle};"></div>
-      ${thumb?`<div class="song-thumb-img"><img src="${escH(thumb)}" onerror="this.style.display='none'" alt="" style="max-width:100%;max-height:100%;object-fit:contain;"></div>`:'<div class="song-thumb-ph" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:40px;">🎵</div>'}
+      ${thumb?`<div class="song-thumb-img"><img src="${escH(thumb)}" onerror="this.style.display='none'" alt="" style="width:100%;height:100%;object-fit:cover;"></div>`:'<div class="song-thumb-ph" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:40px;">🎵</div>'}
       ${s.url?'<div class="song-modal-hover">▶ 바로가기</div>':""}
     </a>
     <div class="song-modal-right">
