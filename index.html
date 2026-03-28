@@ -2549,11 +2549,18 @@ function getSongBadgeLabel(type){
 }
 
 // 시트 컬럼: 발매일(0) 앨범구분(1) 앨범명(2) 트랙#(3) 곡명(4) 곡구분(5) 링크(6)
+// 시트 컬럼: 발매일(A=0) 앨범구분(B=1) 앨범명(C=2) 트랙#(D=3) 곡명(E=4) 곡구분(F=5) [숨김G=6] [숨김H=7] 링크(I=8)
 function csvToSongs(rows){
   return rows.map(r=>{
-    const [date,albumType,album,track,title,type,url]=[...r,...Array(7).fill("")];
+    const date=(r[0]||"").trim();
+    const albumType=(r[1]||"").trim();
+    const album=(r[2]||"").trim();
+    const track=(r[3]||"").trim();
+    const title=(r[4]||"").trim();
+    const type=(r[5]||"").trim();
+    const url=(r[8]||"").trim(); // 링크는 I열(index 8)
     if(!title) return null;
-    return {date,albumType,album,track,title,type,url:(url||"").trim()};
+    return {date,albumType,album,track,title,type,url};
   }).filter(Boolean);
 }
 
