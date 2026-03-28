@@ -2566,8 +2566,8 @@ function csvToSongs(rows){
     const album=(r[2]||"").trim()||lastAlbum;
     const track=(r[3]||"").trim();
     const title=(r[4]||"").trim();
-    // 곡구분: r[5]가 URL이면 다음 비URL 비빈 컬럼 탐색
-    const rawF=(r[5]||"").trim();
+    // 곡구분: H열(index 7), F·G열 숨김
+    const rawF=(r[7]||"").trim();
     const type=(rawF&&!rawF.startsWith("http"))?rawF:"";
     if(!title) return null;
     if((r[0]||"").trim()) lastDate=(r[0]||"").trim();
@@ -2649,7 +2649,7 @@ function renderSongs(){
       const bl=getSongBadgeLabel(s.type);
       const thumb=ytThumb(s.url);
       const bgStyle=thumb?`background-image:url('${thumb}')`:(`background:${st.bg}`);
-      return`<div class="song-card" onclick="openSongModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+      return`<div class="song-card" onclick="openSongModal(${JSON.stringify(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;')})">
         <div class="song-thumb-wrap">
           <div class="song-thumb-blur" style="${bgStyle};"></div>
           ${thumb?`<div class="song-thumb-img"><img src="${escH(thumb)}" onerror="this.style.display='none'" alt=""></div>`:'<div class="song-thumb-ph">🎵</div>'}
