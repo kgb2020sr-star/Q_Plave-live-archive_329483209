@@ -783,7 +783,7 @@ const matchM=(arr)=>{
 };
 
 /* ── state ── */
-let curTab="broadcast",curYear="all",curMemSet=new Set(),curQ="",curTagQ="",curTagMode="include",curEra="all",curSpecial="all",curTGFilter="all",curSort="desc";
+let curTab="broadcast",curYearSet=new Set(),curMemSet=new Set(),curQ="",curTagQ="",curTagMode="include",curEra="all",curSpecial="all",curTGFilter="all",curSort="desc";
 let curTGSet=new Set(["a","b","c"]); // 태그 복수선택
 let curSearchTitleOnly=false;
 let curBcastSet=new Set(["live"]); // 방송 타입 기본: 라이브만
@@ -792,7 +792,8 @@ let curBcastAllActive=false; // 방송 라벨 토글 상태
 // Birthday dates (MM.DD) and milestone title patterns
 const BDAY_DATES=new Set(["02.10","03.12","05.24","06.19","07.15","09.12","11.01"]);
 const MILESTONE_RE=/100일|1000일|100회|200회|300회|회 특집/;
-function isSpecialBday(d){return BDAY_DATES.has(d);}
+function normD(d){if(!d)return d;const p=d.split(".");return p.length===2?p[0].padStart(2,"0")+"."+p[1].padStart(2,"0"):d;}
+function isSpecialBday(d){return BDAY_DATES.has(normD(d));}
 function isSpecialMilestone(d,t){return !isSpecialBday(d)&&MILESTONE_RE.test(t);}
 function matchSpecial(d,t){
   if(curSpecial==="all")return true;
@@ -1839,7 +1840,7 @@ function switchTab(t,btn){
   render();
 }
 function resetYear(){
-  curYear="all"; curSpecial="all";
+  curYearSet=new Set(); curSpecial="all";
   document.querySelectorAll("#year-filters .btn:not(.btn-special)").forEach(b=>b.classList.remove("active"));
   document.querySelectorAll(".btn-special").forEach(b=>b.classList.remove("active"));
   render();
@@ -1869,13 +1870,14 @@ function setSpecial(btn){
   render();
 }
 function setYear(btn){
+  const y=btn.dataset.year;
   if(btn.classList.contains("active")){
-    btn.classList.remove("active"); curYear="all";
+    btn.classList.remove("active");
+    curYearSet.delete(y);
   } else {
-    // 연도 버튼만 해제 (생일 버튼 제외)
-    document.querySelectorAll("#year-filters .btn:not(.btn-special)").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active"); curYear=btn.dataset.year;
-    // 시즌 해제, 생일은 유지
+    btn.classList.add("active");
+    curYearSet.add(y);
+    // 시즌 해제, 생일 유지
     document.querySelectorAll("#era-filters .btn").forEach(b=>b.classList.remove("active"));
     curEra="all";
   }
@@ -1969,9 +1971,8 @@ function matchTitleOrTags(t, sid){
   return allTags.some(tag=>tag.toLowerCase().includes(q2));
 }
 function matchYear(y){
-  if(curYear==="all")return true;
-  if(curTagMode==="exact") return y===+curYear;
-  return y===+curYear; // year is always exact by nature —포함/일치 same effect here
+  if(curYearSet.size===0) return true;
+  return curYearSet.has(String(y));
 }
 function renderLive(){
   const f=L.filter((b)=>{
