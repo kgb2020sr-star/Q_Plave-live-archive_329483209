@@ -2566,9 +2566,9 @@ function csvToSongs(rows){
     const album=(r[2]||"").trim()||lastAlbum;
     const track=(r[3]||"").trim();
     const title=(r[4]||"").trim();
-    // 곡구분: H열(index 7), F·G열 숨김
-    const rawF=(r[7]||"").trim();
-    const type=(rawF&&!rawF.startsWith("http"))?rawF:"";
+    // 곡구분: 타이틀/수록곡/OST/inst 중 하나인 컬럼 스캔
+    const typeKeywords=["타이틀","수록곡","ost","inst","참여"];
+    const type=r.slice(5).map(v=>(v||"").trim()).find(v=>v&&!v.startsWith("http")&&typeKeywords.some(k=>v.toLowerCase().includes(k)))||"";
     if(!title) return null;
     if((r[0]||"").trim()) lastDate=(r[0]||"").trim();
     if(rawB&&!rawB.startsWith("http")) lastAlbumType=rawB;
