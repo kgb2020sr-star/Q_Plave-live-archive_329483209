@@ -365,7 +365,7 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 .sb-ost{background:rgba(45,212,191,.75);color:#003d35;}
 .sb-inst{background:rgba(255,183,77,.75);color:#3d2000;}
 /* 모달 */
-.song-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;}
+.song-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;}
 .song-modal-box{background:#0f0f1e;border:1px solid rgba(255,255,255,.12);border-radius:12px;overflow:hidden;display:flex;width:min(500px,95vw);max-height:90vh;}
 .song-modal-left{width:180px;height:180px;flex-shrink:0;position:relative;overflow:hidden;background:#111;cursor:pointer;}
 .song-modal-left:hover .song-modal-hover{opacity:1;}
@@ -2596,6 +2596,7 @@ function openSongModal(s){
   const overlay=document.createElement("div");
   overlay.className="song-modal-overlay";
   overlay.id="song-modal-overlay";
+  overlay.style.display="flex";
   overlay.onclick=e=>{if(e.target===overlay) closeSongModal();};
   overlay.innerHTML=`
   <div class="song-modal-box">
