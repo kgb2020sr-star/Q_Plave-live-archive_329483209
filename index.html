@@ -714,9 +714,6 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
         <div class="modal-main-title" id="m-title"></div>
       </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
-      <button id="m-link-icon-btn" onclick="openModalLink()" title="영상 링크 열기/수정"
-        style="background:none;border:none;cursor:pointer;font-size:15px;padding:4px 6px;color:var(--muted);border-radius:5px;transition:background .15s;"
-        onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🔗</button>
     </div>
     <div class="modal-body">
 
@@ -1843,11 +1840,8 @@ function switchTab(t,btn){
 }
 function resetYear(){
   curYear="all"; curSpecial="all";
-  document.querySelectorAll("#year-filters .btn").forEach(b=>b.classList.remove("active"));
-  document.querySelectorAll(".btn-special").forEach(b=>{
-    b.classList.remove("active");
-    
-  });
+  document.querySelectorAll("#year-filters .btn:not(.btn-special)").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".btn-special").forEach(b=>b.classList.remove("active"));
   render();
 }
 function resetMember(){
@@ -1878,9 +1872,10 @@ function setYear(btn){
   if(btn.classList.contains("active")){
     btn.classList.remove("active"); curYear="all";
   } else {
-    document.querySelectorAll("#year-filters .btn").forEach(b=>b.classList.remove("active"));
+    // 연도 버튼만 해제 (생일 버튼 제외)
+    document.querySelectorAll("#year-filters .btn:not(.btn-special)").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active"); curYear=btn.dataset.year;
-    // 시즌 해제, 생일은 유지(중복 가능)
+    // 시즌 해제, 생일은 유지
     document.querySelectorAll("#era-filters .btn").forEach(b=>b.classList.remove("active"));
     curEra="all";
   }
