@@ -181,13 +181,13 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 .card-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:5px;}
 .card-row-label{font-size:10px;color:var(--muted);white-space:nowrap;margin-top:3px;}
 .card-members{display:flex;gap:4px;flex-wrap:wrap;}
-.member-pill{font-size:11px;border-radius:4px;padding:2px 7px;font-weight:500;}
-.pill-yejun{background:rgba(77,166,255,.1);color:var(--yejun);}
-.pill-noah{background:rgba(168,85,247,.1);color:var(--noah);}
-.pill-bambi{background:rgba(255,107,157,.1);color:var(--bambi);}
-.pill-eunho{background:rgba(255,82,82,.1);color:var(--eunho);}
-.pill-hamin{background:rgba(82,204,122,.1);color:var(--hamin);}
-.pill-all{background:rgba(240,230,255,.07);color:var(--all);}
+.member-pill{font-size:11px;border-radius:8px;padding:3px 9px;font-weight:500;border:1px solid transparent;display:inline-flex;align-items:center;gap:3px;}
+.pill-yejun{background:rgba(77,166,255,.1);color:var(--yejun);border-color:rgba(77,166,255,.35);}
+.pill-noah{background:rgba(168,85,247,.1);color:var(--noah);border-color:rgba(168,85,247,.35);}
+.pill-bambi{background:rgba(255,107,157,.1);color:var(--bambi);border-color:rgba(255,107,157,.35);}
+.pill-eunho{background:rgba(255,82,82,.1);color:var(--eunho);border-color:rgba(255,82,82,.35);}
+.pill-hamin{background:rgba(82,204,122,.1);color:var(--hamin);border-color:rgba(82,204,122,.35);}
+.pill-all{background:rgba(240,230,255,.07);color:var(--all);border-color:rgba(240,230,255,.2);}
 .guest-none{font-size:11px;color:var(--muted);}
 .guest-special{background:rgba(255,215,0,.08);color:#d4a800;border:1px solid rgba(255,215,0,.18);
   border-radius:4px;padding:2px 7px;font-size:11px;}
@@ -803,9 +803,10 @@ main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:18px 16p
 <script>
 /* ── helpers ── */
 const MC={예준:"yejun",노아:"noah",밤비:"bambi",은호:"eunho",하민:"hamin",전원:"all"};
+const ME={예준:"💙",노아:"💜",밤비:"🩷",은호:"❤️",하민:"🖤",전원:"✨"};
 const TGK={a:"tagsA",b:"tagsB",c:"tagsC"};
 const pc=m=>"pill-"+(MC[m]||"all");
-const pills=arr=>arr.map(m=>`<span class="member-pill ${pc(m)}">${m}</span>`).join("");
+const pills=arr=>arr.map(m=>`<span class="member-pill ${pc(m)}">${ME[m]||""} ${m}</span>`).join("");
 function cc(arr){
   if(!arr||!arr.length)return"c-mixed";
   if(arr.includes("전원"))return"c-all";
@@ -1275,7 +1276,7 @@ function matchTag(sid){
   return allTagsInScope.some(t=>t.toLowerCase().includes(q2));
 }
 
-function escH(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function escH(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 
 function thumbErr(imgEl){
   const cur=imgEl.src||"";
@@ -2193,11 +2194,11 @@ function renderUnifiedCard(item,yy){
   if(type==="live"){
     badge=`<span class="badge badge-type-live">📺 라이브</span>`;
     title=item.t||"";
-    memberPills=(item.m||[]).map(m=>`<span class="pill ${pc(m)}">${m}</span>`).join("");
+    memberPills=(item.m||[]).map(m=>`<span class="member-pill ${pc(m)}">${ME[m]||""} ${m}</span>`).join("");
   } else if(type==="radio"){
     badge=`<span class="badge badge-type-radio">📻 라디오</span>`;
     title=`DJ ${(item.dj||[]).join("·")}${(item.g||[]).length?` · 게스트 ${item.g.join("·")}`:""}`;
-    memberPills=[...(item.dj||[]),...(item.g||[])].map(m=>`<span class="pill ${pc(m)}">${m}</span>`).join("");
+    memberPills=[...(item.dj||[]),...(item.g||[])].map(m=>`<span class="member-pill ${pc(m)}">${ME[m]||""} ${m}</span>`).join("");
   } else {
     badge=`<span class="badge badge-type-lassgo">🚀 라쓰고</span>`;
     title=item.t||"";
